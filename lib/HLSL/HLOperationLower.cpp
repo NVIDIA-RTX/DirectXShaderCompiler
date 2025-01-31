@@ -6872,6 +6872,54 @@ Value *TranslateCoopVectorNegate(CallInst *CI, IntrinsicOp IOP,
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr});
 }
 
+Value *TranslateCoopVectorOuterProdAcc(
+    CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+    HLOperationLowerHelper &helper, HLObjectOperationLowerHelper *pObjHelper,
+    bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *IpVector1 =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccIpVec1Idx);
+  Value *IpVector2 =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccIpVec2Idx);
+  Value *Matrix =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatIdx);
+  Value *MatrixOffset =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatOffsetIdx);
+  Value *MatrixInterpretation =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatInterpretIdx);
+  Value *MatLayout =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatLayoutIdx);
+  Value *MatStride =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatStrideIdx);
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, IpVector1, IpVector2, Matrix,
+                             MatrixOffset, MatrixInterpretation, MatLayout, MatStride});
+}
+
+Value *TranslateCoopVectorRedSumAcc(CallInst *CI, IntrinsicOp IOP,
+                                       OP::OpCode opcode,
+                                       HLOperationLowerHelper &helper,
+                                       HLObjectOperationLowerHelper *pObjHelper,
+                                       bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *IpVector = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx); 
+  Value *Buffer =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatIdx);
+  Value *BufferOffset =
+      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatOffsetIdx);
+
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, IpVector, Buffer, BufferOffset});
+}
+
 } // namespace
 
 // Resource Handle.
@@ -7639,6 +7687,11 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::CoopVector_BitwiseShift},
     {IntrinsicOp::MOP_NOT, TranslateCoopVectorNegate,
      DXIL::OpCode::CoopVector_Negate},
+    {IntrinsicOp::MOP_OuterProductAccumulate, TranslateCoopVectorOuterProdAcc,
+     DXIL::OpCode::CoopVector_OuterProductAccumulate},
+    {IntrinsicOp::MOP_ReduceSumAccumulate, TranslateCoopVectorRedSumAcc,
+     DXIL::OpCode::CoopVector_ReduceSumAccumulate},
+
 
 // SPIRV change starts
 #ifdef ENABLE_SPIRV_CODEGEN

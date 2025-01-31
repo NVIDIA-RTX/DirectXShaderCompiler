@@ -2395,6 +2395,8 @@ ID  Name                                                  Description
 281 CoopVector_ScalarBitwiseOp                            Perform Scalar bitwise operation on each element of Cooperative Vector
 282 CoopVector_BitwiseShift                               Shift left each integer vector by given num of bits
 283 CoopVector_Negate                                     Unary Complement
+284 CoopVector_OuterProductAccumulate                     Outer Product Accumulate
+285 CoopVector_ReduceSumAccumulate                        Reduce Sum Accumulate
 === ===================================================== =======================================================================================================================================================================================================================
 
 

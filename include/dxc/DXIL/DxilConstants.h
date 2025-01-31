@@ -541,7 +541,9 @@ enum class OpCode : unsigned {
   CoopVector_Max = 274, // Perform componentwise max between Coop Vectors
   CoopVector_Min = 273, // Perform componentwise min between Coop Vectors
   CoopVector_Negate = 283, // Unary Complement
+  CoopVector_OuterProductAccumulate = 284, // Outer Product Accumulate
   CoopVector_ReadFromIndex = 275, // Read a Coop Vector Element at Index
+  CoopVector_ReduceSumAccumulate = 285, // Reduce Sum Accumulate
   CoopVector_ScalarMax = 272, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_ScalarMin = 271, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_ScalarMulAdd = 270, // Perform scalar operation on each element of Cooperative Vector
@@ -892,9 +894,9 @@ enum class OpCode : unsigned {
   NumOpCodes_Dxil_1_5 = 216,
   NumOpCodes_Dxil_1_6 = 222,
   NumOpCodes_Dxil_1_7 = 226,
-  NumOpCodes_Dxil_1_8 = 284,
+  NumOpCodes_Dxil_1_8 = 286,
 
-  NumOpCodes = 284 // exclusive last value of enumeration
+  NumOpCodes = 286 // exclusive last value of enumeration
 };
 // OPCODE-ENUM:END
 
@@ -960,7 +962,9 @@ enum class OpCodeClass : unsigned {
   CoopVector_Max,
   CoopVector_Min,
   CoopVector_Negate,
+  CoopVector_OuterProductAccumulate,
   CoopVector_ReadFromIndex,
+  CoopVector_ReduceSumAccumulate,
   CoopVector_ScalarMax,
   CoopVector_ScalarMin,
   CoopVector_ScalarMulAdd,
@@ -1238,9 +1242,9 @@ enum class OpCodeClass : unsigned {
   NumOpClasses_Dxil_1_5 = 143,
   NumOpClasses_Dxil_1_6 = 149,
   NumOpClasses_Dxil_1_7 = 153,
-  NumOpClasses_Dxil_1_8 = 209,
+  NumOpClasses_Dxil_1_8 = 211,
 
-  NumOpClasses = 209 // exclusive last value of enumeration
+  NumOpClasses = 211 // exclusive last value of enumeration
 };
 // OPCODECLASS-ENUM:END
 

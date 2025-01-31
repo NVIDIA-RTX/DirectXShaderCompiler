@@ -386,6 +386,8 @@ enum class IntrinsicOp {
   MOP_SHL,
   MOP_SHR,
   MOP_NOT,
+  MOP_OuterProductAccumulate,
+  MOP_ReduceSumAccumulate,
 
 #ifdef ENABLE_SPIRV_CODEGEN
   MOP_SubpassLoad,

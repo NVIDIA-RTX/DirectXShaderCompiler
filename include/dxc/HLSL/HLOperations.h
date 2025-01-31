@@ -477,6 +477,20 @@ const unsigned kCoopVecMatMulAddMatLayoutIdx = 12;
 const unsigned kCoopVecMatMulAddMatIsTransposeIdx = 13;
 const unsigned kCoopVecMatMulAddMatStrideIdx = 14;
 
+// CoopVec OuterProd Function Arg Indices
+const unsigned kCoopVecOuterProdAccIpVec1Idx          = 1;
+const unsigned kCoopVecOuterProdAccIpVec2Idx          = 2;
+const unsigned kCoopVecOuterProdAccOpMatIdx           = 3;
+const unsigned kCoopVecOuterProdAccOpMatOffsetIdx     = 4;
+const unsigned kCoopVecOuterProdAccOpMatInterpretIdx  = 5;
+const unsigned kCoopVecOuterProdAccOpMatLayoutIdx     = 6;
+const unsigned kCoopVecOuterProdAccOpMatStrideIdx     = 7;
+
+// CoopVector MatMul Function Arg indices
+const unsigned kCoopVecRedSumAccIpVecIdx      = 1;
+const unsigned kCoopVecRedSumAccBufIdx        = 2;
+const unsigned kCoopVecRedSumAccBufOffsetIdx  = 3;
+
 // AnnotateWaveMatrix.
 const unsigned kAnnotateCoopVectorPtrOpIdx = 1;
 const unsigned kAnnotateCoopVectorPropertiesOpIdx = 2;

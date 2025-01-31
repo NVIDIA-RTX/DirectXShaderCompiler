@@ -1275,6 +1275,9 @@ namespace CoopVecMethods {
 	void [[amo]] Multiply(in CoopVec VecA);
 	void [[amo]] MatMul(in CoopVec iVec, in uint iI, in ByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in bool isTranspose, in uint matStride);
 	void [[amo]] MatMulAdd(in CoopVec iVec, in uint iI, in ByteAddressBuffer mat, in uint matOff, in uint mI, in ByteAddressBuffer bias, in uint biasOff, in uint bI, in uint M, in uint K, in uint Layout, in bool isTranspose, in uint matStride);
+	void [[amo]] OuterProductAccumulate(in CoopVec iVec1, in CoopVec iVec2, in ByteAddressBuffer mat, in uint matOffset, in uint mI, in uint Layout, in uint matStride);
+	void [[amo]] ReduceSumAccumulate(in CoopVec iVec, in ByteAddressBuffer buf, in uint bufOffset);
+	
 	void [[amo]] Fill(in $match<1, -1> numeric value);
 	void [[amo]] CopyFrom(in CoopVec ipVec);
 	$match<-1, -1> numeric [[amo]] ReadFromIndex(in uint index);

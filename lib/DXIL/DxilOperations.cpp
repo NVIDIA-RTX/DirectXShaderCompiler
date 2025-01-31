@@ -505,6 +505,8 @@ const OP::OpCodeProperty OP::m_OpCodeProps[(unsigned)OP::OpCode::NumOpCodes] = {
   // CoopVector                                                                                                              void,     h,     f,     d,    i1,    i8,   i16,   i32,   i64,   udt,   obj ,  function attribute
   {  OC::CoopVector_BitwiseShift, "CoopVector_BitwiseShift",  OCC::CoopVector_BitwiseShift,  "coopVector_BitwiseShift",   { false, false, false, false, false,  true,  true,  true,  true, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_Negate,       "CoopVector_Negate",        OCC::CoopVector_Negate,        "coopVector_Negate",         {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::ArgMemOnly, },
+  {  OC::CoopVector_OuterProductAccumulate, "CoopVector_OuterProductAccumulate", OCC::CoopVector_OuterProductAccumulate, "coopVector_OuterProductAccumulate", {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
+  {  OC::CoopVector_ReduceSumAccumulate, "CoopVector_ReduceSumAccumulate", OCC::CoopVector_ReduceSumAccumulate, "coopVector_ReduceSumAccumulate", {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
 };
 // OPCODE-OLOADS:END
 
@@ -1160,8 +1162,9 @@ void OP::GetMinShaderModelAndMask(OpCode C, bool bWithTranslation,
   // CoopVector_ScalarMax=272, CoopVector_Min=273, CoopVector_Max=274,
   // CoopVector_ReadFromIndex=275, CoopVector_WriteToIndex=276,
   // CoopVector_Activation=277, CoopVector_Clamp=278, CoopVector_BitwiseOp=280,
-  // CoopVector_BitwiseShift=282, CoopVector_Negate=283
-  if (op == 245 || op == 254 || (258 <= op && op <= 261) || (263 <= op && op <= 278) || op == 280 || (282 <= op && op <= 283)) {
+  // CoopVector_BitwiseShift=282, CoopVector_Negate=283,
+  // CoopVector_OuterProductAccumulate=284, CoopVector_ReduceSumAccumulate=285
+  if (op == 245 || op == 254 || (258 <= op && op <= 261) || (263 <= op && op <= 278) || op == 280 || (282 <= op && op <= 285)) {
     major = 6;  minor = 8;
     return;
   }
@@ -1958,6 +1961,8 @@ Function *OP::GetOpFunc(OpCode opCode, Type *pOverloadType) {
                         // CoopVector
                       case OpCode::CoopVector_BitwiseShift:A(pV);       A(pI32); A(pCoopVector);A(pI8);  A(pETy); break;
                       case OpCode::CoopVector_Negate:      A(pV);       A(pI32); A(pCoopVector);break;
+                      case OpCode::CoopVector_OuterProductAccumulate:A(pV);       A(pI32); A(pCoopVector);A(pCoopVector);A(pRes); A(pI32); A(pI32); A(pI32); A(pI32); break;
+                      case OpCode::CoopVector_ReduceSumAccumulate:A(pV);       A(pI32); A(pCoopVector);A(pRes); A(pI32); break;
   // OPCODE-OLOAD-FUNCS:END
   default:
     DXASSERT(false, "otherwise unhandled case");
@@ -2236,6 +2241,8 @@ llvm::Type *OP::GetOverloadType(OpCode opCode, llvm::Function *F) {
   case OpCode::CoopVector_Clamp:
   case OpCode::CoopVector_BitwiseOp:
   case OpCode::CoopVector_Negate:
+  case OpCode::CoopVector_OuterProductAccumulate:
+  case OpCode::CoopVector_ReduceSumAccumulate:
     return Type::getVoidTy(Ctx);
   case OpCode::CheckAccessFullyMapped:
   case OpCode::SampleIndex:

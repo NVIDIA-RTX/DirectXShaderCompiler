@@ -729,6 +729,9 @@ class db_dxil(object):
         for i in "CoopVector_ReadFromIndex,CoopVector_WriteToIndex,CoopVector_LoadGroupShared,CoopVector_StoreGroupShared".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
+        for i in "CoopVector_OuterProductAccumulate,CoopVector_ReduceSumAccumulate".split(","):
+            self.name_idx[i].category = "CoopVector"
+            self.name_idx[i].shader_model = 6, 8
 
 
 
@@ -6198,10 +6201,46 @@ class db_dxil(object):
         )
         next_op_idx += 1
 
+        self.add_dxil_op(
+            "CoopVector_OuterProductAccumulate",
+            next_op_idx,
+            "CoopVector_OuterProductAccumulate",
+            "Outer Product Accumulate",
+            "v",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopVectorPtr_input1", "CoopVector pointer"),
+                db_dxil_param(3, "coopvector", "coopVectorPtr_input2", "CoopVector pointer"),
+                db_dxil_param(4, "res", "matrix", "Accumulation Matrix"),
+                db_dxil_param(5, "i32", "matrixOffsetInBytes", "offset in bytes"),
+                db_dxil_param(6, "i32", "matrixIntepretation", "Matrix Intepretation"),
+                db_dxil_param(7, "i32", "Layout", "Matrix Layout"),
+                db_dxil_param(8, "i32", "matrixStride", "Matrix Stride"),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_dxil_op(
+            "CoopVector_ReduceSumAccumulate",
+            next_op_idx,
+            "CoopVector_ReduceSumAccumulate",
+            "Reduce Sum Accumulate",
+            "v",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopVectorPtr_input", "CoopVector pointer"),
+                db_dxil_param(3, "res", "matrix", "Accumulation Buffer"),
+                db_dxil_param(4, "i32", "bufferOffsetInBytes", "offset in bytes"),
+            ],
+        )
+        next_op_idx += 1
+
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 284   , (
-            "258 is expected next operation index but encountered %d and thus opcodes are broken"
+        assert next_op_idx == 286   , (
+            "286 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )
 
