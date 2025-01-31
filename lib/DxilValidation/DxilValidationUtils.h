@@ -69,6 +69,7 @@ struct ValidationContext {
   Module *pDebugModule;
   DxilModule &DxilMod;
   const Type *HandleTy;
+  const Type *WaveMatrixTy;
   const DataLayout &DL;
   DebugLoc LastDebugLocEmit;
   ValidationRule LastRuleEmit;
