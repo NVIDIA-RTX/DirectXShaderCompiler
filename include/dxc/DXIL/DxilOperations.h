@@ -79,6 +79,9 @@ public:
   llvm::Type *GetFourI16Type() const;
   llvm::StructType *GetWaveMatrixPropertiesType() const;
   llvm::PointerType *GetWaveMatPtrType() const;
+  llvm::StructType *GetCoopVecPropertiesType() const;
+  llvm::PointerType *GetCoopVecPtrType() const;
+
 
   llvm::Type *GetResRetType(llvm::Type *pOverloadType);
   llvm::Type *GetCBufferRetType(llvm::Type *pOverloadType);
@@ -163,6 +166,9 @@ private:
   llvm::Type *m_pFourI16Type;
   llvm::StructType *m_pWaveMatInfoType;
   llvm::PointerType *m_pWaveMatPtrType;
+  llvm::PointerType *m_pCoopVectorType;
+  llvm::StructType  *m_pCoopVectorPropsType;
+
 
   DXIL::LowPrecisionMode m_LowPrecisionMode;
 

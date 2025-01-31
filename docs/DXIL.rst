@@ -2369,6 +2369,8 @@ ID  Name                                                  Description
 255 SampleCmpBias                                         samples a texture after applying the input bias to the mipmap level and compares a single component against the specified comparison value
 256 StartVertexLocation                                   returns the BaseVertexLocation from DrawIndexedInstanced or StartVertexLocation from DrawInstanced
 257 StartInstanceLocation                                 returns the StartInstanceLocation from Draw*Instanced
+258 CoopVector_Index                                      Returns the element in an Coop Vector at specified index
+259 CoopVector_Annotate                                   Annotate a wave matrix pointer with the type information
 === ===================================================== =======================================================================================================================================================================================================================
 
 
@@ -3019,11 +3021,14 @@ The set of validation rules that are known to hold for a DXIL program is identif
 Rule Code                                 Description
 ========================================= ========================================================================================================================================================================================================================================================================================================
 BITCODE.VALID                             Module must be bitcode-valid
+CONTAINER.CONTENTINVALID                  DXIL Container Content is well-formed
+CONTAINER.CONTENTMATCHES                  DXIL Container Content must match Module
 CONTAINER.PARTINVALID                     DXIL Container must not contain unknown parts
 CONTAINER.PARTMATCHES                     DXIL Container Parts must match Module
 CONTAINER.PARTMISSING                     DXIL Container requires certain parts, corresponding to module
 CONTAINER.PARTREPEATED                    DXIL Container must have only one of each part type
 CONTAINER.ROOTSIGNATUREINCOMPATIBLE       Root Signature in DXIL Container must be compatible with shader
+CONTAINER.UNUSEDITEMINTABLE               Items in Table must be used
 DECL.ATTRSTRUCT                           Attributes parameter must be struct type
 DECL.DXILFNEXTERN                         External function must be a DXIL function
 DECL.DXILNSRESERVED                       The DXIL reserved prefixes must only be used by built-in functions and types
@@ -3245,6 +3250,7 @@ SM.OPERAND                                Operand must be defined in target shad
 SM.OUTPUTCONTROLPOINTCOUNTRANGE           output control point count must be [%0..%1].  %2 specified.
 SM.OUTPUTCONTROLPOINTSTOTALSCALARS        Total number of scalars across all HS output control points must not exceed .
 SM.PATCHCONSTANTONLYFORHSDS               patch constant signature only valid in HS and DS.
+SM.PROGRAMVERSION                         Program Version in Dxil Container does not match Dxil Module shader model version
 SM.PSCONSISTENTINTERP                     Interpolation mode for PS input position must be linear_noperspective_centroid or linear_noperspective_sample when outputting oDepthGE or oDepthLE and not running at sample frequency (which is forced by inputting SV_SampleIndex or declaring an input linear_sample or linear_noperspective_sample).
 SM.PSCOVERAGEANDINNERCOVERAGE             InnerCoverage and Coverage are mutually exclusive.
 SM.PSMULTIPLEDEPTHSEMANTIC                Pixel Shader only allows one type of depth semantic to be declared.

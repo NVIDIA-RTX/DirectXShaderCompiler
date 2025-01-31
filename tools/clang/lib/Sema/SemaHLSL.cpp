@@ -249,6 +249,7 @@ enum ArBasicKind {
 
   AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS,
   AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS,
+  AR_OBJECT_COOP_VECTOR,
 
   AR_BASIC_MAXIMUM_COUNT
 };
@@ -621,6 +622,7 @@ const UINT g_uBasicKindProps[] = {
 
     BPROP_OBJECT | BPROP_RWBUFFER, // AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS,
     BPROP_OBJECT | BPROP_RWBUFFER, // AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS,
+    BPROP_OBJECT,                  // AR_OBJECT_COOP_VECTOR
 
     // AR_BASIC_MAXIMUM_COUNT
 };
@@ -1295,6 +1297,9 @@ static const ArBasicKind g_AnyOutputRecordCT[] = {
     AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS, AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS,
     AR_BASIC_UNKNOWN};
 
+static const ArBasicKind g_CoopVectorCT[] = {AR_OBJECT_COOP_VECTOR,
+                                             AR_BASIC_UNKNOWN};
+
 // Basic kinds, indexed by a LEGAL_INTRINSIC_COMPTYPES value.
 const ArBasicKind *g_LegalIntrinsicCompTypes[] = {
     g_NullCT,               // LICOMPTYPE_VOID
@@ -1354,6 +1359,7 @@ const ArBasicKind *g_LegalIntrinsicCompTypes[] = {
     g_AnyOutputRecordCT,         // LICOMPTYPE_ANY_NODE_OUTPUT_RECORD
     g_GroupNodeOutputRecordsCT,  // LICOMPTYPE_GROUP_NODE_OUTPUT_RECORDS
     g_ThreadNodeOutputRecordsCT, // LICOMPTYPE_THREAD_NODE_OUTPUT_RECORDS
+    g_CoopVectorCT,              // LICOMPTYPE_OPAQUE_VECTOR
 };
 static_assert(
     ARRAYSIZE(g_LegalIntrinsicCompTypes) == LICOMPTYPE_COUNT,
@@ -1446,7 +1452,9 @@ static const ArBasicKind g_ArBasicKindsAsTypes[] = {
     AR_OBJECT_NODE_OUTPUT, AR_OBJECT_EMPTY_NODE_OUTPUT,
     AR_OBJECT_NODE_OUTPUT_ARRAY, AR_OBJECT_EMPTY_NODE_OUTPUT_ARRAY,
 
-    AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS, AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS};
+    AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS, AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS,
+    AR_OBJECT_COOP_VECTOR
+};
 
 // Count of template arguments for basic kind of objects that look like
 // templates (one or more type arguments).
@@ -1568,6 +1576,7 @@ static const uint8_t g_ArBasicKindsTemplateCount[] = {
 
     1, // AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS,
     1, // AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS
+    2, // AR_OBJECT_COOP_VECTOR
 };
 
 C_ASSERT(_countof(g_ArBasicKindsAsTypes) ==
@@ -1720,6 +1729,7 @@ static const SubscriptOperatorRecord g_ArBasicKindsSubscripts[] = {
 
     {1, MipsFalse, SampleFalse}, // AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS
     {1, MipsFalse, SampleFalse}, // AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS
+    {1, MipsFalse, SampleFalse}, // AR_OBJECT_COOP_VECTOR
 };
 
 C_ASSERT(_countof(g_ArBasicKindsAsTypes) == _countof(g_ArBasicKindsSubscripts));
@@ -1792,7 +1802,9 @@ static const char *g_ArBasicTypeNames[] = {
 
     "NodeOutput", "EmptyNodeOutput", "NodeOutputArray", "EmptyNodeOutputArray",
 
-    "ThreadNodeOutputRecords", "GroupNodeOutputRecords"};
+    "ThreadNodeOutputRecords", "GroupNodeOutputRecords", 
+    "CooperativeVector"
+};
 
 C_ASSERT(_countof(g_ArBasicTypeNames) == AR_BASIC_MAXIMUM_COUNT);
 
@@ -3815,6 +3827,8 @@ private:
         recordDecl = m_GroupNodeOutputRecordsTemplateDecl->getTemplatedDecl();
       } else if (kind == AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS) {
         recordDecl = m_ThreadNodeOutputRecordsTemplateDecl->getTemplatedDecl();
+      } else if (kind == AR_OBJECT_COOP_VECTOR) {
+        recordDecl = DeclareCoopVectorType(*m_context);
       }
 #ifdef ENABLE_SPIRV_CODEGEN
       else if (kind == AR_OBJECT_VK_SPIRV_TYPE) {

@@ -709,6 +709,15 @@ class db_dxil(object):
             self.name_idx[i].shader_stages = ("vertex",)
             self.name_idx[i].shader_model = 6, 8
 
+        for i in "CoopVector_Index".split(","):
+            self.name_idx[i].category = "Get an element from the Coop Vector"
+            self.name_idx[i].shader_model = 6,8
+
+        for i in ("CoopVector_Annotate").split(","):
+            self.name_idx[i].category = "Coop Vector intrinsics"
+            self.name_idx[i].shader_model = 6,8
+
+
     def populate_llvm_instructions(self):
         # Add instructions that map to LLVM instructions.
         # This is basically include\llvm\IR\Instruction.def
@@ -5674,10 +5683,21 @@ class db_dxil(object):
             [db_dxil_param(0, "i32", "", "result")],
         )
         next_op_idx += 1
+        self.add_dxil_op("CoopVector_Index", next_op_idx, "CoopVector_Index", "Returns the element in an Coop Vector at specified index", "v", "ro", [
+             db_dxil_param(0, "$o", "", "Vector Element"),
+             db_dxil_param(2, "coopvector", "coopvector", "coopvectortype"),
+             db_dxil_param(3, "i32", "index", "element index")])
+        next_op_idx += 1
+        self.add_dxil_op("CoopVector_Annotate", next_op_idx, "CoopVector_Annotate", "Annotate a wave matrix pointer with the type information", "v", "amo", [
+             db_dxil_param(0, "v", "", ""),
+             db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+             db_dxil_param(3, "coopvectorprops", "coopvectorprops", "constant Coop Vector type info", is_const=True)])
+        next_op_idx += 1
+
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 258, (
+        assert next_op_idx == 260, (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )
@@ -8464,6 +8484,7 @@ class db_hlsl(object):
             "AnyNodeOutputRecord": "LICOMPTYPE_ANY_NODE_OUTPUT_RECORD",
             "GroupNodeOutputRecords": "LICOMPTYPE_GROUP_NODE_OUTPUT_RECORDS",
             "ThreadNodeOutputRecords": "LICOMPTYPE_THREAD_NODE_OUTPUT_RECORDS",
+            "CoopVec": "LICOMPTYPE_COOP_VECTOR",
         }
 
         self.trans_rowcol = {"r": "IA_R", "c": "IA_C", "r2": "IA_R2", "c2": "IA_C2"}

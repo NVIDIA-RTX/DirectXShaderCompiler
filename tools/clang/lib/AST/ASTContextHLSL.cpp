@@ -1179,6 +1179,23 @@ clang::CXXRecordDecl *hlsl::DeclareWaveMatrixType(clang::ASTContext &context,
   return templateRecordDecl;
 }
 
+clang::CXXRecordDecl *hlsl::DeclareCoopVectorType(clang::ASTContext &context) {
+  StringRef Name = "OpaqueVector";
+  BuiltinTypeDeclBuilder typeDeclBuilder(context.getTranslationUnitDecl(),
+                                         Name);
+  TemplateTypeParmDecl *TyParamDecl =
+      typeDeclBuilder.addTypeTemplateParam("type");
+  typeDeclBuilder.addIntegerTemplateParam("dim", context.UnsignedIntTy);
+  typeDeclBuilder.startDefinition();
+  CXXRecordDecl *templateRecordDecl = typeDeclBuilder.getRecordDecl();
+  // Add an 'h' field to hold the handle
+  typeDeclBuilder.addField("h", GetHLSLObjectHandleType(context));
+  QualType ResultType =
+      context.getTemplateTypeParmType(0, 0, ParameterPackFalse, TyParamDecl);
+  AddRecordSubscriptAccess(context, templateRecordDecl, ResultType, false);
+  return templateRecordDecl;
+}
+
 CXXRecordDecl *hlsl::DeclareResourceType(ASTContext &context, bool bSampler) {
   // struct ResourceDescriptor { uint8 desc; }
   StringRef Name = bSampler ? ".Sampler" : ".Resource";

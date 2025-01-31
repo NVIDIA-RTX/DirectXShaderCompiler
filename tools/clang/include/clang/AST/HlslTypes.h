@@ -390,6 +390,7 @@ clang::CXXRecordDecl *DeclareConstantBufferViewType(clang::ASTContext &context,
 clang::CXXRecordDecl *DeclareRayQueryType(clang::ASTContext &context);
 clang::CXXRecordDecl *DeclareWaveMatrixType(clang::ASTContext &context,
                                             DXIL::WaveMatrixKind kind);
+clang::CXXRecordDecl *DeclareCoopVectorType(clang::ASTContext &context);
 clang::CXXRecordDecl *DeclareResourceType(clang::ASTContext &context,
                                           bool bSampler);
 

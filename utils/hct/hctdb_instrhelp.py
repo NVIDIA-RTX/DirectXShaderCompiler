@@ -599,6 +599,8 @@ class db_oload_gen:
             "noderecordhandle": "A(pNodeRecordHandle);",
             "nodeproperty": "A(nodeProperty);",
             "noderecordproperty": "A(nodeRecordProperty);",
+            "coopvector": "A(pCoopVector);",
+            "coopvectorprops": "A(pCoopVectorProps);"
         }
         last_category = None
         for i in self.instrs:
