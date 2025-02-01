@@ -639,6 +639,22 @@ bool IsHLSLCoopVectorType(llvm::Type *Ty) {
   return false;
 }
 
+bool IsDXILCoopVectorType(llvm::Type *Ty) {
+  if (Ty->isPointerTy())
+    Ty = Ty->getPointerElementType();
+  if (llvm::StructType *ST = dyn_cast<llvm::StructType>(Ty)) {
+    if (!ST->hasName())
+      return false;
+    StringRef name = ST->getName();
+    // TODO: don't check names.
+    ConsumePrefix(name, "dx.types.");
+    if (name.startswith("coop"))
+      return true;
+  }
+  return false;
+}
+
+
 bool IsHLSLResourceDescType(llvm::Type *Ty) {
   if (llvm::StructType *ST = dyn_cast<llvm::StructType>(Ty)) {
     if (!ST->hasName())

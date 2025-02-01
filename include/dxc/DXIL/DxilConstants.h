@@ -520,8 +520,10 @@ enum class OpCode : unsigned {
   ThreadId = 93, // reads the thread ID
   ThreadIdInGroup = 95, // reads the thread ID within the group (SV_GroupThreadID)
 
-  // Coop Vector intrinsics
+  // CoopVector
   CoopVector_Annotate = 259, // Annotate a wave matrix pointer with the type information
+  CoopVector_Index = 258, // Returns the element in an Coop Vector at specified index
+  CoopVector_ScalarOp = 260, // Perform scalar operation on each element of Cooperative Vector
 
   // Create/Annotate Node Handles
   AllocateNodeOutputRecords = 238, // returns a handle for the output records
@@ -574,9 +576,6 @@ enum class OpCode : unsigned {
 
   // Get Pointer to Node Record in Address Space 6
   GetNodeRecordPtr = 239, // retrieve node input/output record pointer in address space 6
-
-  // Get an element from the Coop Vector
-  CoopVector_Index = 258, // Returns the element in an Coop Vector at specified index
 
   // Get handle from heap
   AnnotateHandle = 216, // annotate handle with resource properties
@@ -868,9 +867,9 @@ enum class OpCode : unsigned {
   NumOpCodes_Dxil_1_5 = 216,
   NumOpCodes_Dxil_1_6 = 222,
   NumOpCodes_Dxil_1_7 = 226,
-  NumOpCodes_Dxil_1_8 = 260,
+  NumOpCodes_Dxil_1_8 = 261,
 
-  NumOpCodes = 260 // exclusive last value of enumeration
+  NumOpCodes = 261 // exclusive last value of enumeration
 };
 // OPCODE-ENUM:END
 
@@ -915,8 +914,10 @@ enum class OpCodeClass : unsigned {
   ThreadId,
   ThreadIdInGroup,
 
-  // Coop Vector intrinsics
+  // CoopVector
   CoopVector_Annotate,
+  CoopVector_Index,
+  CoopVector_ScalarOp,
 
   // Create/Annotate Node Handles
   AllocateNodeOutputRecords,
@@ -965,9 +966,6 @@ enum class OpCodeClass : unsigned {
 
   // Get Pointer to Node Record in Address Space 6
   GetNodeRecordPtr,
-
-  // Get an element from the Coop Vector
-  CoopVector_Index,
 
   // Get handle from heap
   AnnotateHandle,
@@ -1190,9 +1188,9 @@ enum class OpCodeClass : unsigned {
   NumOpClasses_Dxil_1_5 = 143,
   NumOpClasses_Dxil_1_6 = 149,
   NumOpClasses_Dxil_1_7 = 153,
-  NumOpClasses_Dxil_1_8 = 185,
+  NumOpClasses_Dxil_1_8 = 186,
 
-  NumOpClasses = 185 // exclusive last value of enumeration
+  NumOpClasses = 186 // exclusive last value of enumeration
 };
 // OPCODECLASS-ENUM:END
 
@@ -1723,6 +1721,14 @@ enum class WaveMatrixScalarOpCode : unsigned {
   Subtract = 1,
 };
 // WAVEMATRIXSCALAROPCODE-ENUM:END
+
+enum class CoopVectorScalarOpCode : unsigned {
+  Add = 0,
+  Divide = 3,
+  Invalid = 4,
+  Multiply = 2,
+  Subtract = 1,
+};
 
 // Corresponds to MEMORY_TYPE_FLAG enums in HLSL
 enum class MemoryTypeFlag : uint32_t {

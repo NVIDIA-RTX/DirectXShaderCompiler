@@ -2371,6 +2371,7 @@ ID  Name                                                  Description
 257 StartInstanceLocation                                 returns the StartInstanceLocation from Draw*Instanced
 258 CoopVector_Index                                      Returns the element in an Coop Vector at specified index
 259 CoopVector_Annotate                                   Annotate a wave matrix pointer with the type information
+260 CoopVector_ScalarOp                                   Perform scalar operation on each element of Cooperative Vector
 === ===================================================== =======================================================================================================================================================================================================================
 
 

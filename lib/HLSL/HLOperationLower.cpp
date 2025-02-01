@@ -6127,29 +6127,41 @@ Value *TranslateWaveMatrixFill(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
   return Builder.CreateCall(dxilFunc, {opArg, thisWaveMatPtr, val});
 }
 
-Value *TranslateWaveMatrixScalarOp(CallInst *CI, IntrinsicOp IOP,
-                                   OP::OpCode opcode,
-                                   HLOperationLowerHelper &helper,
-                                   HLObjectOperationLowerHelper *pObjHelper,
-                                   bool &Translated) {
+Value *TranslateScalarOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                         HLOperationLowerHelper &helper,
+                         HLObjectOperationLowerHelper *pObjHelper,
+                         bool &Translated) {
   hlsl::OP *hlslOP = &helper.hlslOP;
 
-  Value *thisWaveMatPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
+  bool IsCoopVector = false;
+  if (dxilutil::IsDXILCoopVectorType(thisPtr->getType())) {
+    IsCoopVector = true;
+    opcode = DXIL::OpCode::CoopVector_ScalarOp;
+  }
   Value *val = CI->getArgOperand(HLOperandIndex::kWaveMatScalarOpOpIdx);
 
-  DXIL::WaveMatrixScalarOpCode scalarOp = DXIL::WaveMatrixScalarOpCode::Invalid;
+  DXIL::WaveMatrixScalarOpCode WMScalarOp =
+      DXIL::WaveMatrixScalarOpCode::Invalid;
+  DXIL::CoopVectorScalarOpCode CVScalarOp =
+      DXIL::CoopVectorScalarOpCode::Invalid;
+
   switch (IOP) {
   case IntrinsicOp::MOP_ScalarAdd:
-    scalarOp = DXIL::WaveMatrixScalarOpCode::Add;
+    WMScalarOp = DXIL::WaveMatrixScalarOpCode::Add;
+    CVScalarOp = DXIL::CoopVectorScalarOpCode::Add;
     break;
   case IntrinsicOp::MOP_ScalarSubtract:
-    scalarOp = DXIL::WaveMatrixScalarOpCode::Subtract;
+    WMScalarOp = DXIL::WaveMatrixScalarOpCode::Subtract;
+    CVScalarOp = DXIL::CoopVectorScalarOpCode::Subtract;
     break;
   case IntrinsicOp::MOP_ScalarMultiply:
-    scalarOp = DXIL::WaveMatrixScalarOpCode::Multiply;
+    WMScalarOp = DXIL::WaveMatrixScalarOpCode::Multiply;
+    CVScalarOp = DXIL::CoopVectorScalarOpCode::Multiply;
     break;
   case IntrinsicOp::MOP_ScalarDivide:
-    scalarOp = DXIL::WaveMatrixScalarOpCode::Divide;
+    WMScalarOp = DXIL::WaveMatrixScalarOpCode::Divide;
+    CVScalarOp = DXIL::CoopVectorScalarOpCode::Divide;
     break;
   default:
     DXASSERT(false, "Missing case for WaveMatrix scalar operation");
@@ -6158,10 +6170,16 @@ Value *TranslateWaveMatrixScalarOp(CallInst *CI, IntrinsicOp IOP,
   IRBuilder<> Builder(CI);
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, val->getType());
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
-  Constant *scalarOpArg = hlslOP->GetU8Const((unsigned)scalarOp);
-  return Builder.CreateCall(dxilFunc,
-                            {opArg, thisWaveMatPtr, scalarOpArg, val});
+  Constant *scalarOpArg = nullptr;
+  if (IsCoopVector) {
+    scalarOpArg = hlslOP->GetU8Const((unsigned)WMScalarOp);
+  } else {
+    scalarOpArg = hlslOP->GetU8Const((unsigned)CVScalarOp);
+  }
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, scalarOpArg, val});
 }
+
 
 Value *TranslateWaveMatrix_Accumulate(CallInst *CI, IntrinsicOp IOP,
                                       OP::OpCode opcode,
@@ -6958,13 +6976,13 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::WaveMatrix_Fill},
     {IntrinsicOp::MOP_MatrixDepth, TranslateWaveMatrixDepth,
      DXIL::OpCode::WaveMatrix_Depth},
-    {IntrinsicOp::MOP_ScalarAdd, TranslateWaveMatrixScalarOp,
+    {IntrinsicOp::MOP_ScalarAdd, TranslateScalarOp,
      DXIL::OpCode::WaveMatrix_ScalarOp},
-    {IntrinsicOp::MOP_ScalarDivide, TranslateWaveMatrixScalarOp,
+    {IntrinsicOp::MOP_ScalarDivide, TranslateScalarOp,
      DXIL::OpCode::WaveMatrix_ScalarOp},
-    {IntrinsicOp::MOP_ScalarMultiply, TranslateWaveMatrixScalarOp,
+    {IntrinsicOp::MOP_ScalarMultiply, TranslateScalarOp,
      DXIL::OpCode::WaveMatrix_ScalarOp},
-    {IntrinsicOp::MOP_ScalarSubtract, TranslateWaveMatrixScalarOp,
+    {IntrinsicOp::MOP_ScalarSubtract, TranslateScalarOp,
      DXIL::OpCode::WaveMatrix_ScalarOp},
     {IntrinsicOp::MOP_SumAccumulate, TranslateWaveMatrix_Accumulate,
      DXIL::OpCode::WaveMatrix_SumAccumulate},

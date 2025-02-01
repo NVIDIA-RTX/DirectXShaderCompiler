@@ -710,12 +710,16 @@ class db_dxil(object):
             self.name_idx[i].shader_model = 6, 8
 
         for i in "CoopVector_Index".split(","):
-            self.name_idx[i].category = "Get an element from the Coop Vector"
+            self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6,8
 
         for i in ("CoopVector_Annotate").split(","):
-            self.name_idx[i].category = "Coop Vector intrinsics"
+            self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6,8
+
+        for i in "CoopVector_ScalarOp".split(","):
+            self.name_idx[i].category = "CoopVector"
+            self.name_idx[i].shader_model = 6, 8
 
 
     def populate_llvm_instructions(self):
@@ -5688,16 +5692,53 @@ class db_dxil(object):
              db_dxil_param(2, "coopvector", "coopvector", "coopvectortype"),
              db_dxil_param(3, "i32", "index", "element index")])
         next_op_idx += 1
+
         self.add_dxil_op("CoopVector_Annotate", next_op_idx, "CoopVector_Annotate", "Annotate a wave matrix pointer with the type information", "v", "amo", [
              db_dxil_param(0, "v", "", ""),
              db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
              db_dxil_param(3, "coopvectorprops", "coopvectorprops", "constant Coop Vector type info", is_const=True)])
         next_op_idx += 1
 
+        self.add_dxil_op(
+            "CoopVector_ScalarOp",
+            next_op_idx,
+            "CoopVector_ScalarOp",
+            "Perform scalar operation on each element of Cooperative Vector",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(
+                    3,
+                    "i8",
+                    "op",
+                    "operation",
+                    enum_name="CoopVectorScalarOpCode",
+                    is_const=True,
+                ),
+                db_dxil_param(4, "$o", "value", "scalar value"),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_enum_type(
+            "CoopVectorScalarOpCode",
+            "Operation for CoopVector_ScalarOp",
+            [
+                (0, "Add", ""),
+                (1, "Subtract", ""),
+                (2, "Multiply", ""),
+                (3, "Divide", ""),
+                (4, "Invalid", ""),
+            ],
+        )
+
+
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 260, (
+        assert next_op_idx == 261, (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )

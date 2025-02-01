@@ -8412,5 +8412,38 @@ struct DxilInst_CoopVector_Annotate {
   llvm::Value *get_coopvectorprops() const { return Instr->getOperand(2); }
   void set_coopvectorprops(llvm::Value *val) { Instr->setOperand(2, val); }
 };
+
+/// This instruction Perform scalar operation on each element of Cooperative Vector
+struct DxilInst_CoopVector_ScalarOp {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_ScalarOp(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_ScalarOp);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (4 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+    arg_op = 2,
+    arg_value = 3,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_op() const { return Instr->getOperand(2); }
+  void set_op(llvm::Value *val) { Instr->setOperand(2, val); }
+  int8_t get_op_val() const { return (int8_t)(llvm::dyn_cast<llvm::ConstantInt>(Instr->getOperand(2))->getZExtValue()); }
+  void set_op_val(int8_t val) { Instr->setOperand(2, llvm::Constant::getIntegerValue(llvm::IntegerType::get(Instr->getContext(), 8), llvm::APInt(8, (uint64_t)val))); }
+  llvm::Value *get_value() const { return Instr->getOperand(3); }
+  void set_value(llvm::Value *val) { Instr->setOperand(3, val); }
+};
 // INSTR-HELPER:END
 } // namespace hlsl
