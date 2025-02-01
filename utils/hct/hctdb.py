@@ -5714,7 +5714,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_Fill",
             "Fill coopvector with scalar value",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -5729,7 +5729,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_ScalarOp",
             "Perform scalar operation on each element of Cooperative Vector",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -5864,7 +5864,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_ScalarMulAdd",
             "Perform scalar operation on each element of Cooperative Vector",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -5879,7 +5879,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_Min",
             "Perform scalar operation on each element of Cooperative Vector",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -5893,7 +5893,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_Max",
             "Perform scalar operation on each element of Cooperative Vector",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -5908,7 +5908,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_ReadFromIndex",
             "Read a Coop Vector Element at Index",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "$o", "", ""),
@@ -5922,7 +5922,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_WriteToIndex",
             "Write a Coop Vector Element at Index",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -5938,7 +5938,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_Activation",
             "Perform scalar operation on each element of Cooperative Vector",
-            "hfi",
+            "hfd8wi",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -6000,7 +6000,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_BitwiseShift",
             "Shift left each integer vector by given num of bits ",
-            "i",
+            "di",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -6031,7 +6031,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_Negate",
             "Unary Complement",
-            "i",
+            "v",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),

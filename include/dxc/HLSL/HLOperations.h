@@ -446,9 +446,7 @@ const unsigned kCoopVecClampCeilValOpIdx = 3;
 const unsigned kCoopVecActivationOpIdx = 2;
 const unsigned kCoopVecIndexOpIdx = 2;
 const unsigned kCoopVecIndexValOpIdx = 3;
-const unsigned kCoopVecBitwiseShiftTypeIdx = 2;
-const unsigned kCoopVecBitwiseShiftValIdx = 3;
-
+const unsigned kCoopVecBitwiseShiftValIdx = 2;
 
 // Work Graph
 

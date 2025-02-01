@@ -6418,9 +6418,10 @@ Value *TranslateCoopVectorMatrixMultiplyAdd(
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
   Value *zeroVal = hlslOP->GetU32Const(0);
   Value *buf = CI->getArgOperand(4);
-  return Builder.CreateCall(dxilFunc,
-                            {opArg, thisPtr, zeroVal, buf, zeroVal, zeroVal,
-                             zeroVal, zeroVal, zeroVal, zeroVal});
+  Value *falseVal = hlslOP->GetI1Const(0);
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, zeroVal, buf, zeroVal,
+                                       zeroVal, buf, zeroVal, zeroVal, zeroVal,
+                                       zeroVal, zeroVal, falseVal, zeroVal});
 }
 
 Value *TranslateCoopVectorCopyFrom(CallInst *CI, IntrinsicOp IOP,
@@ -6603,7 +6604,6 @@ Value *TranslateCoopVectorBitwiseShiftOp(
   hlsl::OP *hlslOP = &helper.hlslOP;
   Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
   IRBuilder<> Builder(CI);
-  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
 
   DXIL::CoopVectorBitwiseShift Op = DXIL::CoopVectorBitwiseShift::Invalid;
 
@@ -6622,6 +6622,7 @@ Value *TranslateCoopVectorBitwiseShiftOp(
   Constant *bitwiseOpArg = hlslOP->GetU8Const((unsigned)Op);
   Value *numBits =
       CI->getArgOperand(HLOperandIndex::kCoopVecBitwiseShiftValIdx);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, numBits->getType());
 
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, bitwiseOpArg, numBits});
 }
