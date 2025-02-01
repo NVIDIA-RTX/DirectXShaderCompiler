@@ -523,7 +523,10 @@ enum class OpCode : unsigned {
   // CoopVector
   CoopVector_Annotate = 259, // Annotate a wave matrix pointer with the type information
   CoopVector_Index = 258, // Returns the element in an Coop Vector at specified index
+  CoopVector_LoadRawBuf = 261, // Load coop vector from raw buffer
+  CoopVector_MatMul = 263, // Vector Matrix Multiply
   CoopVector_ScalarOp = 260, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_StoreRawBuf = 262, // Store wave matrix to raw buffer
 
   // Create/Annotate Node Handles
   AllocateNodeOutputRecords = 238, // returns a handle for the output records
@@ -867,9 +870,9 @@ enum class OpCode : unsigned {
   NumOpCodes_Dxil_1_5 = 216,
   NumOpCodes_Dxil_1_6 = 222,
   NumOpCodes_Dxil_1_7 = 226,
-  NumOpCodes_Dxil_1_8 = 261,
+  NumOpCodes_Dxil_1_8 = 264,
 
-  NumOpCodes = 261 // exclusive last value of enumeration
+  NumOpCodes = 264 // exclusive last value of enumeration
 };
 // OPCODE-ENUM:END
 
@@ -917,7 +920,10 @@ enum class OpCodeClass : unsigned {
   // CoopVector
   CoopVector_Annotate,
   CoopVector_Index,
+  CoopVector_LoadRawBuf,
+  CoopVector_MatMul,
   CoopVector_ScalarOp,
+  CoopVector_StoreRawBuf,
 
   // Create/Annotate Node Handles
   AllocateNodeOutputRecords,
@@ -1188,9 +1194,9 @@ enum class OpCodeClass : unsigned {
   NumOpClasses_Dxil_1_5 = 143,
   NumOpClasses_Dxil_1_6 = 149,
   NumOpClasses_Dxil_1_7 = 153,
-  NumOpClasses_Dxil_1_8 = 186,
+  NumOpClasses_Dxil_1_8 = 189,
 
-  NumOpClasses = 186 // exclusive last value of enumeration
+  NumOpClasses = 189 // exclusive last value of enumeration
 };
 // OPCODECLASS-ENUM:END
 

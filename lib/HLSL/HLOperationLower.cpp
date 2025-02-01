@@ -4311,6 +4311,12 @@ Value *TranslateWaveMatLoadStore(CallInst *CI, IntrinsicOp IOP,
                                  HLObjectOperationLowerHelper *pObjHelper,
                                  bool &Translated);
 
+Value *TranslateCoopVecLoadStore(CallInst *CI, IntrinsicOp IOP,
+                                 OP::OpCode opcode,
+                                 HLOperationLowerHelper &helper,
+                                 HLObjectOperationLowerHelper *pObjHelper,
+                                 bool &Translated);
+
 Value *TranslateResourceLoad(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
                              HLOperationLowerHelper &helper,
                              HLObjectOperationLowerHelper *pObjHelper,
@@ -4321,6 +4327,9 @@ Value *TranslateResourceLoad(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
   // object.Load(...) could be WaveMatrix Load instead of resource method
   if (handle->getType() == hlslOP->GetWaveMatPtrType())
     return TranslateWaveMatLoadStore(CI, IOP, opcode, helper, pObjHelper,
+                                     Translated);
+  if (handle->getType() == hlslOP->GetCoopVecPtrType())
+    return TranslateCoopVecLoadStore(CI, IOP, opcode, helper, pObjHelper,
                                      Translated);
 
   IRBuilder<> Builder(CI);
@@ -4614,6 +4623,11 @@ Value *TranslateResourceStore(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
   if (handle->getType() == hlslOP->GetWaveMatPtrType())
     return TranslateWaveMatLoadStore(CI, IOP, opcode, helper, pObjHelper,
                                      Translated);
+
+  if (handle->getType() == hlslOP->GetCoopVecPtrType())
+    return TranslateCoopVecLoadStore(CI, IOP, opcode, helper, pObjHelper,
+                                     Translated);
+
 
   IRBuilder<> Builder(CI);
   DXIL::ResourceKind RK = pObjHelper->GetRK(handle);
@@ -6219,6 +6233,25 @@ Value *TranslateWaveMatrixMultiply(CallInst *CI, IntrinsicOp IOP,
       dxilFunc, {opArg, thisWaveMatPtr, otherWaveMatPtr1, otherWaveMatPtr2});
 }
 
+Value *TranslateCoopVectorMatrixMultiply(
+    CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+    HLOperationLowerHelper &helper, HLObjectOperationLowerHelper *pObjHelper,
+    bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisWaveMatPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
+
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *zeroVal = hlslOP->GetU32Const(0);
+  Value *buf = CI->getArgOperand(4);
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, thisWaveMatPtr, zeroVal, buf, zeroVal,
+                             zeroVal, zeroVal, zeroVal, zeroVal, zeroVal});
+}
+
+
 Value *TranslateWaveMatLoadStore(CallInst *CI, IntrinsicOp IOP,
                                  OP::OpCode opcode,
                                  HLOperationLowerHelper &helper,
@@ -6295,6 +6328,51 @@ Value *TranslateWaveMatLoadStore(CallInst *CI, IntrinsicOp IOP,
 
   return Builder.CreateCall(dxilFunc, args);
 }
+
+Value *TranslateCoopVecLoadStore(CallInst *CI, IntrinsicOp IOP,
+                                 OP::OpCode opcode,
+                                 HLOperationLowerHelper &helper,
+                                 HLObjectOperationLowerHelper *pObjHelper,
+                                 bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  // buf is raw buffer handle or groupshared ptr:
+  Value *buf = CI->getArgOperand(HLOperandIndex::kWaveMatLoadStoreBufOpIdx);
+  Type *bufETy = buf->getType();
+  bool bRawBuf = bufETy == hlslOP->GetHandleType();
+
+  if (IOP == IntrinsicOp::MOP_Load) {
+    opcode = OP::OpCode::CoopVector_LoadRawBuf;
+  } else if (IOP == IntrinsicOp::MOP_Store) {
+    opcode = OP::OpCode::CoopVector_StoreRawBuf;
+  } else {
+    DXASSERT(0, "otherwise, unexpected IntrinsicOp");
+  }
+
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+
+  IRBuilder<> Builder(CI);
+  SmallVector<Value *, 7> args;
+  args.push_back(hlslOP->GetU32Const((unsigned)opcode));
+  args.push_back(CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx));
+  args.push_back(buf);
+  args.push_back(
+      CI->getArgOperand(HLOperandIndex::kWaveMatLoadStoreStartOpIdx));
+
+  // if handle, push align arg
+  if (bRawBuf) {
+    Value *align = ConstantInt::get(helper.i8Ty, (uint64_t)0);
+    const unsigned AlignOpIdx = 5;
+    if (CI->getNumArgOperands() > AlignOpIdx) {
+      align = CI->getArgOperand(AlignOpIdx);
+      align = Builder.CreateTrunc(align, helper.i8Ty);
+    }
+    args.push_back(align);
+  }
+
+  return Builder.CreateCall(dxilFunc, args);
+}
+
 
 } // namespace
 
@@ -7013,6 +7091,11 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::IncrementOutputCount},
     {IntrinsicOp::MOP_OutputComplete, TranslateNodeOutputComplete,
      DXIL::OpCode::OutputComplete},
+    {IntrinsicOp::MOP_MatMul, TranslateCoopVectorMatrixMultiply,
+     DXIL::OpCode::OutputComplete},
+    {IntrinsicOp::MOP_MatMulAdd, TranslateCoopVectorMatrixMultiply,
+     DXIL::OpCode::OutputComplete},
+
 
 // SPIRV change starts
 #ifdef ENABLE_SPIRV_CODEGEN

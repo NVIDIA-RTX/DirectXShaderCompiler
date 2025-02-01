@@ -361,6 +361,8 @@ enum class IntrinsicOp {
   MOP_GroupIncrementOutputCount,
   MOP_ThreadIncrementOutputCount,
   MOP_OutputComplete,
+  MOP_MatMul,
+  MOP_MatMulAdd,
 #ifdef ENABLE_SPIRV_CODEGEN
   MOP_SubpassLoad,
 #endif // ENABLE_SPIRV_CODEGEN

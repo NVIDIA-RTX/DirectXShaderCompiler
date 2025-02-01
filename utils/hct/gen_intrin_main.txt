@@ -1266,6 +1266,9 @@ namespace CoopVecMethods {
 
 	void [[amo]] Add(in CoopVec VecA);
 	void [[amo]] Multiply(in CoopVec VecA);
+	void [[amo]] MatMul(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in uint matStride);
+	void [[amo]] MatMulAdd(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in uint matStride, in RWByteAddressBuffer bias, in uint biasOff, in uint bI);
+
 
 } namespace
 

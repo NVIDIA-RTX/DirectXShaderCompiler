@@ -2372,6 +2372,9 @@ ID  Name                                                  Description
 258 CoopVector_Index                                      Returns the element in an Coop Vector at specified index
 259 CoopVector_Annotate                                   Annotate a wave matrix pointer with the type information
 260 CoopVector_ScalarOp                                   Perform scalar operation on each element of Cooperative Vector
+261 CoopVector_LoadRawBuf                                 Load coop vector from raw buffer
+262 CoopVector_StoreRawBuf                                Store wave matrix to raw buffer
+263 CoopVector_MatMul                                     Vector Matrix Multiply
 === ===================================================== =======================================================================================================================================================================================================================
 
 

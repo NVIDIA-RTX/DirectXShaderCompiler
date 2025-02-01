@@ -8445,5 +8445,126 @@ struct DxilInst_CoopVector_ScalarOp {
   llvm::Value *get_value() const { return Instr->getOperand(3); }
   void set_value(llvm::Value *val) { Instr->setOperand(3, val); }
 };
+
+/// This instruction Load coop vector from raw buffer
+struct DxilInst_CoopVector_LoadRawBuf {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_LoadRawBuf(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_LoadRawBuf);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (5 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopVectorPtr = 1,
+    arg_rawBuf = 2,
+    arg_offsetInBytes = 3,
+    arg_alignmentInBytes = 4,
+  };
+  // Accessors
+  llvm::Value *get_coopVectorPtr() const { return Instr->getOperand(1); }
+  void set_coopVectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_rawBuf() const { return Instr->getOperand(2); }
+  void set_rawBuf(llvm::Value *val) { Instr->setOperand(2, val); }
+  llvm::Value *get_offsetInBytes() const { return Instr->getOperand(3); }
+  void set_offsetInBytes(llvm::Value *val) { Instr->setOperand(3, val); }
+  llvm::Value *get_alignmentInBytes() const { return Instr->getOperand(4); }
+  void set_alignmentInBytes(llvm::Value *val) { Instr->setOperand(4, val); }
+  int8_t get_alignmentInBytes_val() const { return (int8_t)(llvm::dyn_cast<llvm::ConstantInt>(Instr->getOperand(4))->getZExtValue()); }
+  void set_alignmentInBytes_val(int8_t val) { Instr->setOperand(4, llvm::Constant::getIntegerValue(llvm::IntegerType::get(Instr->getContext(), 8), llvm::APInt(8, (uint64_t)val))); }
+};
+
+/// This instruction Store wave matrix to raw buffer
+struct DxilInst_CoopVector_StoreRawBuf {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_StoreRawBuf(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_StoreRawBuf);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (5 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopVectorPtr = 1,
+    arg_rawBuf = 2,
+    arg_offsetInBytes = 3,
+    arg_alignmentInBytes = 4,
+  };
+  // Accessors
+  llvm::Value *get_coopVectorPtr() const { return Instr->getOperand(1); }
+  void set_coopVectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_rawBuf() const { return Instr->getOperand(2); }
+  void set_rawBuf(llvm::Value *val) { Instr->setOperand(2, val); }
+  llvm::Value *get_offsetInBytes() const { return Instr->getOperand(3); }
+  void set_offsetInBytes(llvm::Value *val) { Instr->setOperand(3, val); }
+  llvm::Value *get_alignmentInBytes() const { return Instr->getOperand(4); }
+  void set_alignmentInBytes(llvm::Value *val) { Instr->setOperand(4, val); }
+  int8_t get_alignmentInBytes_val() const { return (int8_t)(llvm::dyn_cast<llvm::ConstantInt>(Instr->getOperand(4))->getZExtValue()); }
+  void set_alignmentInBytes_val(int8_t val) { Instr->setOperand(4, llvm::Constant::getIntegerValue(llvm::IntegerType::get(Instr->getContext(), 8), llvm::APInt(8, (uint64_t)val))); }
+};
+
+/// This instruction Vector Matrix Multiply
+struct DxilInst_CoopVector_MatMul {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_MatMul(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_MatMul);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (10 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopVectorPtr = 1,
+    arg_inputInterpretation = 2,
+    arg_rawBuf = 3,
+    arg_matrixOffsetInBytes = 4,
+    arg_matrixIntepretation = 5,
+    arg_M = 6,
+    arg_K = 7,
+    arg_Layout = 8,
+    arg_matrixStride = 9,
+  };
+  // Accessors
+  llvm::Value *get_coopVectorPtr() const { return Instr->getOperand(1); }
+  void set_coopVectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_inputInterpretation() const { return Instr->getOperand(2); }
+  void set_inputInterpretation(llvm::Value *val) { Instr->setOperand(2, val); }
+  llvm::Value *get_rawBuf() const { return Instr->getOperand(3); }
+  void set_rawBuf(llvm::Value *val) { Instr->setOperand(3, val); }
+  llvm::Value *get_matrixOffsetInBytes() const { return Instr->getOperand(4); }
+  void set_matrixOffsetInBytes(llvm::Value *val) { Instr->setOperand(4, val); }
+  llvm::Value *get_matrixIntepretation() const { return Instr->getOperand(5); }
+  void set_matrixIntepretation(llvm::Value *val) { Instr->setOperand(5, val); }
+  llvm::Value *get_M() const { return Instr->getOperand(6); }
+  void set_M(llvm::Value *val) { Instr->setOperand(6, val); }
+  llvm::Value *get_K() const { return Instr->getOperand(7); }
+  void set_K(llvm::Value *val) { Instr->setOperand(7, val); }
+  llvm::Value *get_Layout() const { return Instr->getOperand(8); }
+  void set_Layout(llvm::Value *val) { Instr->setOperand(8, val); }
+  llvm::Value *get_matrixStride() const { return Instr->getOperand(9); }
+  void set_matrixStride(llvm::Value *val) { Instr->setOperand(9, val); }
+};
 // INSTR-HELPER:END
 } // namespace hlsl
