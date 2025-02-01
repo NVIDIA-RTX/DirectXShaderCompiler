@@ -571,6 +571,10 @@ bool IsHLSLObjectType(llvm::Type *Ty) {
     if (IsHLSLWaveMatrixType(Ty))
       return true;
 
+    if (IsHLSLCoopVectorType(Ty))
+      return true;
+
+
     if (IsHLSLNodeIOType(Ty))
       return true;
   }
