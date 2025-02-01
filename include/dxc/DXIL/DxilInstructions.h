@@ -8413,6 +8413,34 @@ struct DxilInst_CoopVector_Annotate {
   void set_coopvectorprops(llvm::Value *val) { Instr->setOperand(2, val); }
 };
 
+/// This instruction Fill coopvector with scalar value
+struct DxilInst_CoopVector_Fill {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_Fill(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_Fill);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (3 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+    arg_value = 2,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_value() const { return Instr->getOperand(2); }
+  void set_value(llvm::Value *val) { Instr->setOperand(2, val); }
+};
+
 /// This instruction Perform scalar operation on each element of Cooperative Vector
 struct DxilInst_CoopVector_ScalarOp {
   llvm::Instruction *Instr;

@@ -6134,12 +6134,45 @@ Value *TranslateWaveMatrixFill(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
 
   Value *thisWaveMatPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
   Value *val = CI->getArgOperand(HLOperandIndex::kWaveMatFillScalarOpIdx);
+  opcode = DXIL::OpCode::WaveMatrix_Fill;
 
   IRBuilder<> Builder(CI);
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, val->getType());
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
   return Builder.CreateCall(dxilFunc, {opArg, thisWaveMatPtr, val});
 }
+
+Value *TranslateCoopVectorFill(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                               HLOperationLowerHelper &helper,
+                               HLObjectOperationLowerHelper *pObjHelper,
+                               bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisWaveMatPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  Value *val = CI->getArgOperand(HLOperandIndex::kWaveMatFillScalarOpIdx);
+  opcode = DXIL::OpCode::CoopVector_Fill;
+
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, val->getType());
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  return Builder.CreateCall(dxilFunc, {opArg, thisWaveMatPtr, val});
+}
+
+Value *TranslateFill(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                     HLOperationLowerHelper &helper,
+                     HLObjectOperationLowerHelper *pObjHelper,
+                     bool &Translated) {
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
+
+  if (dxilutil::IsDXILCoopVectorType(thisPtr->getType())) {
+    return TranslateCoopVectorFill(CI, IOP, opcode, helper, pObjHelper,
+                                   Translated);
+  } else {
+    return TranslateWaveMatrixFill(CI, IOP, opcode, helper, pObjHelper,
+                                   Translated);
+  }
+}
+
 
 Value *TranslateScalarOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
                          HLOperationLowerHelper &helper,
@@ -7166,8 +7199,8 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::RayQuery_WorldRayDirection},
     {IntrinsicOp::MOP_WorldRayOrigin, TranslateRayQueryFloat3Getter,
      DXIL::OpCode::RayQuery_WorldRayOrigin},
-    {IntrinsicOp::MOP_Fill, TranslateWaveMatrixFill,
-     DXIL::OpCode::WaveMatrix_Fill},
+    {IntrinsicOp::MOP_Fill, TranslateFill, 
+    DXIL::OpCode::NumOpCodes},
     {IntrinsicOp::MOP_MatrixDepth, TranslateWaveMatrixDepth,
      DXIL::OpCode::WaveMatrix_Depth},
     {IntrinsicOp::MOP_ScalarAdd, TranslateScalarOp,

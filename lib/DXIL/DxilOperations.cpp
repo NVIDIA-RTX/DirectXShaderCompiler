@@ -469,6 +469,7 @@ const OP::OpCodeProperty OP::m_OpCodeProps[(unsigned)OP::OpCode::NumOpCodes] = {
   // CoopVector                                                                                                              void,     h,     f,     d,    i1,    i8,   i16,   i32,   i64,   udt,   obj ,  function attribute
   {  OC::CoopVector_Index,        "CoopVector_Index",         OCC::CoopVector_Index,         "coopVector_Index",          {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::ReadOnly, },
   {  OC::CoopVector_Annotate,     "CoopVector_Annotate",      OCC::CoopVector_Annotate,      "coopVector_Annotate",       {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::ArgMemOnly, },
+  {  OC::CoopVector_Fill,         "CoopVector_Fill",          OCC::CoopVector_Fill,          "coopVector_Fill",           { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_ScalarOp,     "CoopVector_ScalarOp",      OCC::CoopVector_ScalarOp,      "coopVector_ScalarOp",       { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_LoadRawBuf,   "CoopVector_LoadRawBuf",    OCC::CoopVector_LoadRawBuf,    "coopVector_LoadRawBuf",     {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
   {  OC::CoopVector_StoreRawBuf,  "CoopVector_StoreRawBuf",   OCC::CoopVector_StoreRawBuf,   "coopVector_StoreRawBuf",    {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
@@ -1126,12 +1127,12 @@ void OP::GetMinShaderModelAndMask(OpCode C, bool bWithTranslation,
     return;
   }
   // Instructions: BarrierByMemoryHandle=245, SampleCmpGrad=254,
-  // CoopVector_Index=258, CoopVector_Annotate=259, CoopVector_ScalarOp=260,
-  // CoopVector_LoadRawBuf=261, CoopVector_StoreRawBuf=262,
-  // CoopVector_MatMul=263, CoopVector_MatMulAdd=264, CoopVector_EqualTo=265,
-  // CoopVector_ScalarMulAdd=266, CoopVector_Min=267, CoopVector_Max=268,
-  // CoopVector_Activation=269, CoopVector_Clamp=270
-  if (op == 245 || op == 254 || (258 <= op && op <= 270)) {
+  // CoopVector_Index=258, CoopVector_Annotate=259, CoopVector_Fill=260,
+  // CoopVector_ScalarOp=261, CoopVector_LoadRawBuf=262,
+  // CoopVector_StoreRawBuf=263, CoopVector_MatMul=264, CoopVector_MatMulAdd=265,
+  // CoopVector_EqualTo=266, CoopVector_ScalarMulAdd=267, CoopVector_Min=268,
+  // CoopVector_Max=269, CoopVector_Activation=270, CoopVector_Clamp=271
+  if (op == 245 || op == 254 || (258 <= op && op <= 271)) {
     major = 6;  minor = 8;
     return;
   }
@@ -1892,6 +1893,7 @@ Function *OP::GetOpFunc(OpCode opCode, Type *pOverloadType) {
                         // CoopVector
                       case OpCode::CoopVector_Index:       A(pETy);     A(pI32); A(pCoopVector);A(pI32); break;
                       case OpCode::CoopVector_Annotate:    A(pV);       A(pI32); A(pCoopVector);A(pCoopVectorProps);break;
+                      case OpCode::CoopVector_Fill:        A(pV);       A(pI32); A(pCoopVector);A(pETy); break;
                       case OpCode::CoopVector_ScalarOp:    A(pV);       A(pI32); A(pCoopVector);A(pI8);  A(pETy); break;
                       case OpCode::CoopVector_LoadRawBuf:  A(pV);       A(pI32); A(pCoopVector);A(pRes); A(pI32); A(pI8);  break;
                       case OpCode::CoopVector_StoreRawBuf: A(pV);       A(pI32); A(pCoopVector);A(pRes); A(pI32); A(pI8);  break;
@@ -2041,6 +2043,7 @@ llvm::Type *OP::GetOverloadType(OpCode opCode, llvm::Function *F) {
   case OpCode::CallShader:
   case OpCode::Pack4x8:
   case OpCode::WaveMatrix_Fill:
+  case OpCode::CoopVector_Fill:
   case OpCode::CoopVector_ScalarMulAdd:
   case OpCode::CoopVector_Min:
   case OpCode::CoopVector_Max:

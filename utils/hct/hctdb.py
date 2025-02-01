@@ -713,7 +713,7 @@ class db_dxil(object):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6,8
 
-        for i in ("CoopVector_Annotate").split(","):
+        for i in ("CoopVector_Annotate,CoopVector_Fill").split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6,8
 
@@ -5703,6 +5703,21 @@ class db_dxil(object):
         next_op_idx += 1
 
         self.add_dxil_op(
+            "CoopVector_Fill",
+            next_op_idx,
+            "CoopVector_Fill",
+            "Fill coopvector with scalar value",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "WaveMatrix pointer"),
+                db_dxil_param(3, "$o", "value", "scalar value to fill matrix with"),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_dxil_op(
             "CoopVector_ScalarOp",
             next_op_idx,
             "CoopVector_ScalarOp",
@@ -5911,7 +5926,7 @@ class db_dxil(object):
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 271, (
+        assert next_op_idx == 272, (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )

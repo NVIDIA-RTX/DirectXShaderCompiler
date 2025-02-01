@@ -2371,17 +2371,18 @@ ID  Name                                                  Description
 257 StartInstanceLocation                                 returns the StartInstanceLocation from Draw*Instanced
 258 CoopVector_Index                                      Returns the element in an Coop Vector at specified index
 259 CoopVector_Annotate                                   Annotate a wave matrix pointer with the type information
-260 CoopVector_ScalarOp                                   Perform scalar operation on each element of Cooperative Vector
-261 CoopVector_LoadRawBuf                                 Load coop vector from raw buffer
-262 CoopVector_StoreRawBuf                                Store wave matrix to raw buffer
-263 CoopVector_MatMul                                     Vector Matrix Multiply
-264 CoopVector_MatMulAdd                                  Vector Matrix Multiply
-265 CoopVector_EqualTo                                    Perform scalar operation on each element of Cooperative Vector
-266 CoopVector_ScalarMulAdd                               Perform scalar operation on each element of Cooperative Vector
-267 CoopVector_Min                                        Perform scalar operation on each element of Cooperative Vector
-268 CoopVector_Max                                        Perform scalar operation on each element of Cooperative Vector
-269 CoopVector_Activation                                 Perform scalar operation on each element of Cooperative Vector
-270 CoopVector_Clamp                                      Perform scalar operation on each element of Cooperative Vector
+260 CoopVector_Fill                                       Fill coopvector with scalar value
+261 CoopVector_ScalarOp                                   Perform scalar operation on each element of Cooperative Vector
+262 CoopVector_LoadRawBuf                                 Load coop vector from raw buffer
+263 CoopVector_StoreRawBuf                                Store wave matrix to raw buffer
+264 CoopVector_MatMul                                     Vector Matrix Multiply
+265 CoopVector_MatMulAdd                                  Vector Matrix Multiply
+266 CoopVector_EqualTo                                    Perform scalar operation on each element of Cooperative Vector
+267 CoopVector_ScalarMulAdd                               Perform scalar operation on each element of Cooperative Vector
+268 CoopVector_Min                                        Perform scalar operation on each element of Cooperative Vector
+269 CoopVector_Max                                        Perform scalar operation on each element of Cooperative Vector
+270 CoopVector_Activation                                 Perform scalar operation on each element of Cooperative Vector
+271 CoopVector_Clamp                                      Perform scalar operation on each element of Cooperative Vector
 === ===================================================== =======================================================================================================================================================================================================================
 
 
