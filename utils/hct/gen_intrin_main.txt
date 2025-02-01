@@ -1263,12 +1263,18 @@ namespace CoopVecMethods {
 	void [[amo]] ScalarDivide(in $match<1, -1> numeric value);
 	void [[amo]] ScalarAdd(in $match<1, -1> numeric value);
 	void [[amo]] ScalarSubtract(in $match<1, -1> numeric value);
+	void [[amo]] ScalarMulAdd(in $match<1, -1> numeric multiplier, in $match<1, -1> numeric addend);
 
 	void [[amo]] Add(in CoopVec VecA);
 	void [[amo]] Multiply(in CoopVec VecA);
-	void [[amo]] MatMul(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in uint matStride);
-	void [[amo]] MatMulAdd(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in uint matStride, in RWByteAddressBuffer bias, in uint biasOff, in uint bI);
-
+	void [[amo]] MatMul(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in bool isTranspose, in uint matStride);
+	void [[amo]] MatMulAdd(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in bool isTranspose,  in uint matStride, in RWByteAddressBuffer bias, in uint biasOff, in uint bI);
+	void [[amo]] Fill(in $match<1, -1> numeric value);
+	void [[amo]] EqualTo(in CoopVec ipVec);
+	void [[amo]] Min(in $match<1, -1> numeric value);
+	void [[amo]] Max(in $match<1, -1> numeric value);
+	void [[amo]] Clamp(in CoopVec floorVec, in CoopVec ceilVec);
+	void [[amo]] Activation(in uint op);
 
 } namespace
 

@@ -720,6 +720,9 @@ class db_dxil(object):
         for i in "CoopVector_ScalarOp,CoopVector_LoadRawBuf,CoopVector_StoreRawBuf,CoopVector_MatMul".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
+        for i in "CoopVector_MatMulAdd,CoopVector_EqualTo,CoopVector_ScalarMulAdd,CoopVector_Min,CoopVector_Max,CoopVector_Clamp,CoopVector_Activation".split(","):
+            self.name_idx[i].category = "CoopVector"
+            self.name_idx[i].shader_model = 6, 8
 
 
     def populate_llvm_instructions(self):
@@ -5788,14 +5791,127 @@ class db_dxil(object):
                 db_dxil_param(7, "i32", "M", "Dimension M"),
                 db_dxil_param(8, "i32", "K", "Dimension K"),
                 db_dxil_param(9, "i32", "Layout", "Matrix Layout"),
-                db_dxil_param(10, "i32", "matrixStride", "Matrix Stride"),
+                db_dxil_param(10, "i1", "Transpose", "Is Transposed"),
+                db_dxil_param(11, "i32", "matrixStride", "Matrix Stride"),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_dxil_op(
+            "CoopVector_MatMulAdd",
+            next_op_idx,
+            "CoopVector_MatMulAdd",
+            "Vector Matrix Multiply",
+            "v",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopVectorPtr", "CoopVector pointer"),
+                db_dxil_param(3, "i32", "inputInterpretation", "Input Interpretation"),
+                db_dxil_param(4, "res", "matrix", "Matrix for Multiply"),
+                db_dxil_param(5, "i32", "matrixOffsetInBytes", "offset in bytes"),
+                db_dxil_param(6, "i32", "matrixIntepretation", "Matrix Intepretation"),
+                db_dxil_param(7, "res", "bias", "Bias for Add"),
+                db_dxil_param(8, "i32", "biasOffsetInBytes", "offset in bytes"),
+                db_dxil_param(9, "i32", "biasIntepretation", "Bias Intepretation"),
+                db_dxil_param(10, "i32", "M", "Dimension M"),
+                db_dxil_param(11, "i32", "K", "Dimension K"),
+                db_dxil_param(12, "i32", "Layout", "Matrix Layout"),
+                db_dxil_param(13, "i1", "Transpose", "Is Transposed"),
+                db_dxil_param(14, "i32", "matrixStride", "Matrix Stride"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_EqualTo",
+            next_op_idx,
+            "CoopVector_EqualTo",
+            "Perform scalar operation on each element of Cooperative Vector",
+            "v",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtrTo", "Coop Vector pointer"),
+                db_dxil_param(3, "coopvector", "coopvectorPtrFrom", "Coop Vector pointer"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_ScalarMulAdd",
+            next_op_idx,
+            "CoopVector_ScalarMulAdd",
+            "Perform scalar operation on each element of Cooperative Vector",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "$o", "valueToMul", "multiplier"),
+                db_dxil_param(4, "$o", "valueToAdd", "addend"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_Min",
+            next_op_idx,
+            "CoopVector_Min",
+            "Perform scalar operation on each element of Cooperative Vector",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "$o", "value", "min value"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_Max",
+            next_op_idx,
+            "CoopVector_Max",
+            "Perform scalar operation on each element of Cooperative Vector",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "$o", "value", "max value"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_Activation",
+            next_op_idx,
+            "CoopVector_Activation",
+            "Perform scalar operation on each element of Cooperative Vector",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "$o", "value", "scalar value"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_Clamp",
+            next_op_idx,
+            "CoopVector_Clamp",
+            "Perform scalar operation on each element of Cooperative Vector",
+            "v",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "coopvector", "coopvectorPtrFlr", "Floor Coop Vector pointer"),
+                db_dxil_param(4, "coopvector", "coopvectorPtrCeil", "Ceil Coop Vector pointer"),
             ],
         )
         next_op_idx += 1
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 264, (
+        assert next_op_idx == 271, (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )
@@ -8635,7 +8751,7 @@ class db_hlsl(object):
             r"""(
             sampler\w* | string |
             (?:RW)?(?:Texture\w*|ByteAddressBuffer) |
-            WaveMatrix\w* | acceleration_struct | ray_desc |
+            WaveMatrix\w* | acceleration_struct | ray_desc | CoopVec |
             Node\w* | RWNode\w* | EmptyNode\w* |
             AnyNodeOutput\w* | NodeOutputRecord\w* | GroupShared\w*
             $)""",

@@ -432,6 +432,17 @@ const unsigned kWaveMatLoadStoreColMajorOpIdx = 5;
 const unsigned kWaveMatFragLoadStoreAlignmentOpIdx = 5;
 const unsigned kWaveMatLoadStoreAlignmentOpIdx = 6;
 
+// Cooperative Vectors
+const unsigned kCoopVecThisOpIdx = 1;
+const unsigned kCoopVecFillScalarOpIdx = 2;
+const unsigned kCoopVecScalarOpOpIdx = 2;
+const unsigned kCoopVecScalarOpOp2Idx = 3;
+const unsigned kCoopVecEqualToVecIdx = 2;
+const unsigned kCoopVecMinMaxValOpIdx = 2;
+const unsigned kCoopVecClampFloorValOpIdx = 2;
+const unsigned kCoopVecClampCeilValOpIdx = 3;
+const unsigned kCoopVecActivationOpIdx = 2;
+
 // Work Graph
 
 const unsigned kIncrementOutputCountCountIdx = 2;

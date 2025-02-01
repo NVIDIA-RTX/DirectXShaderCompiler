@@ -521,10 +521,17 @@ enum class OpCode : unsigned {
   ThreadIdInGroup = 95, // reads the thread ID within the group (SV_GroupThreadID)
 
   // CoopVector
+  CoopVector_Activation = 269, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_Annotate = 259, // Annotate a wave matrix pointer with the type information
+  CoopVector_Clamp = 270, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_EqualTo = 265, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_Index = 258, // Returns the element in an Coop Vector at specified index
   CoopVector_LoadRawBuf = 261, // Load coop vector from raw buffer
   CoopVector_MatMul = 263, // Vector Matrix Multiply
+  CoopVector_MatMulAdd = 264, // Vector Matrix Multiply
+  CoopVector_Max = 268, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_Min = 267, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_ScalarMulAdd = 266, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_ScalarOp = 260, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_StoreRawBuf = 262, // Store wave matrix to raw buffer
 
@@ -870,9 +877,9 @@ enum class OpCode : unsigned {
   NumOpCodes_Dxil_1_5 = 216,
   NumOpCodes_Dxil_1_6 = 222,
   NumOpCodes_Dxil_1_7 = 226,
-  NumOpCodes_Dxil_1_8 = 264,
+  NumOpCodes_Dxil_1_8 = 271,
 
-  NumOpCodes = 264 // exclusive last value of enumeration
+  NumOpCodes = 271 // exclusive last value of enumeration
 };
 // OPCODE-ENUM:END
 
@@ -918,10 +925,17 @@ enum class OpCodeClass : unsigned {
   ThreadIdInGroup,
 
   // CoopVector
+  CoopVector_Activation,
   CoopVector_Annotate,
+  CoopVector_Clamp,
+  CoopVector_EqualTo,
   CoopVector_Index,
   CoopVector_LoadRawBuf,
   CoopVector_MatMul,
+  CoopVector_MatMulAdd,
+  CoopVector_Max,
+  CoopVector_Min,
+  CoopVector_ScalarMulAdd,
   CoopVector_ScalarOp,
   CoopVector_StoreRawBuf,
 
@@ -1194,9 +1208,9 @@ enum class OpCodeClass : unsigned {
   NumOpClasses_Dxil_1_5 = 143,
   NumOpClasses_Dxil_1_6 = 149,
   NumOpClasses_Dxil_1_7 = 153,
-  NumOpClasses_Dxil_1_8 = 189,
+  NumOpClasses_Dxil_1_8 = 196,
 
-  NumOpClasses = 189 // exclusive last value of enumeration
+  NumOpClasses = 196 // exclusive last value of enumeration
 };
 // OPCODECLASS-ENUM:END
 

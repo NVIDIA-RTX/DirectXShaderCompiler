@@ -359,6 +359,7 @@ enum ArBasicKind {
 #define BPROP_WAVE_MATRIX_ACC                                                  \
   0x04000000 // Whether the type is a wave matrix accum object
              // (Accumulator/LeftColAcc/RightRowAcc)
+#define BPROP_COOP_VECTOR 0x08000000 // Whether the type is a coop vector
 
 #define GET_BPROP_PRIM_KIND(_Props)                                            \
   ((_Props) & (BPROP_BOOLEAN | BPROP_INTEGER | BPROP_FLOATING))
@@ -402,6 +403,8 @@ enum ArBasicKind {
   (((_Props) & BPROP_WAVE_MATRIX_INPUT) != 0)
 #define IS_BPROP_WAVE_MATRIX_ACC(_Props)                                       \
   (((_Props) & BPROP_WAVE_MATRIX_ACC) != 0)
+
+#define IS_BPROP_COOP_VECTOR(_Props) (((_Props) & BPROP_COOP_VECTOR) != 0)
 
 const UINT g_uBasicKindProps[] = {
     BPROP_PRIMITIVE | BPROP_BOOLEAN | BPROP_INTEGER | BPROP_NUMERIC |
@@ -622,7 +625,7 @@ const UINT g_uBasicKindProps[] = {
 
     BPROP_OBJECT | BPROP_RWBUFFER, // AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS,
     BPROP_OBJECT | BPROP_RWBUFFER, // AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS,
-    BPROP_OBJECT,                  // AR_OBJECT_COOP_VECTOR
+    BPROP_OBJECT | BPROP_COOP_VECTOR, // AR_OBJECT_COOP_VECTOR
 
     // AR_BASIC_MAXIMUM_COUNT
 };
@@ -666,6 +669,8 @@ C_ASSERT(ARRAYSIZE(g_uBasicKindProps) == AR_BASIC_MAXIMUM_COUNT);
   IS_BPROP_WAVE_MATRIX_ACC(GetBasicKindProps(_Kind))
 #define IS_BASIC_WAVE_MATRIX(_Kind)                                            \
   (IS_BASIC_WAVE_MATRIX_INPUT(_Kind) || IS_BASIC_WAVE_MATRIX_ACC(_Kind))
+#define IS_BASIC_COOP_VECTOR(_Kind)                                            \
+  IS_BPROP_COOP_VECTOR(GetBasicKindProps(_Kind))
 
 #define BITWISE_ENUM_OPS(_Type)                                                \
   inline _Type operator|(_Type F1, _Type F2) {                                 \
@@ -1004,6 +1009,31 @@ static bool GetWaveMatrixTemplateValues(QualType objType, QualType *compType,
       *dimM = (unsigned)args[1].getAsIntegral().getExtValue();
     if (dimN)
       *dimN = (unsigned)args[2].getAsIntegral().getExtValue();
+    return true;
+  }
+  return false;
+}
+
+// Gets component type, dimM from CoopVector* instantiated type.
+// Assumes coop vector type, returns false if anything isn't as expected.
+static bool GetCoopVectorTemplateValues(QualType objType, QualType *compType,
+                                        unsigned *dimN) {
+  const CXXRecordDecl *CXXRD = objType.getCanonicalType()->getAsCXXRecordDecl();
+  if (const ClassTemplateSpecializationDecl *templateSpecializationDecl =
+          dyn_cast<ClassTemplateSpecializationDecl>(CXXRD)) {
+    const clang::TemplateArgumentList &args =
+        templateSpecializationDecl->getTemplateInstantiationArgs();
+    if (args.size() != 2)
+      return false;
+    if (args[0].getKind() != TemplateArgument::Type ||
+        !args[0].getAsType()->isBuiltinType())
+      return false;
+    if (args[1].getKind() != TemplateArgument::Integral)
+      return false;
+    if (compType)
+      *compType = args[0].getAsType();
+    if (dimN)
+      *dimN = (unsigned)args[1].getAsIntegral().getExtValue();
     return true;
   }
   return false;
@@ -4124,7 +4154,9 @@ public:
   bool IsWaveMatrixType(QualType type) {
     return IsWaveMatrixBasicKind(GetTypeElementKind(type));
   }
-
+  bool IsCoopVectorBasicKind(ArBasicKind kind) {
+    return kind == AR_OBJECT_COOP_VECTOR;
+  }
   void WarnMinPrecision(QualType Type, SourceLocation Loc) {
     Type = Type->getCanonicalTypeUnqualified();
     if (IsVectorType(m_sema, Type) || IsMatrixType(m_sema, Type)) {
@@ -6887,7 +6919,34 @@ bool HLSLExternalSource::MatchArguments(
         pNewType = GetOrCreateTemplateSpecialization(
             *m_context, *m_sema,
             templateRecordDecl->getDescribedClassTemplate(), templateArgs);
-      } else {
+      } else if (IsCoopVectorBasicKind(pEltType)) {
+      CXXRecordDecl *templateRecordDecl =
+          GetBasicKindType(pEltType)->getAsCXXRecordDecl();
+      if (!templateRecordDecl->isCompleteDefinition()) {
+        // If template definition is not completed, no instantiations exist,
+        // so we can assume this candiate does not apply.
+        badArgIdx = std::min(badArgIdx, i);
+        return false;
+      }
+      // read template args of objectType
+      ArTypeInfo objInfo;
+      CollectInfo(objectType, &objInfo);
+      ArTypeInfo argInfo;
+      CollectInfo(Args[i - 1]->getType(), &argInfo);
+      ArBasicKind eltKind =
+          objInfo.EltKind; // GetValidWaveMatrixComponentTypeForArg(
+      // objInfo.ObjKind, objInfo.EltKind, argInfo.ObjKind, argInfo.EltKind);
+      QualType compType = GetBasicKindType(eltKind);
+      // Now construct the expected argument specialization
+      TemplateArgument templateArgs[2] = {
+          TemplateArgument(compType),
+          TemplateArgument(*m_context,
+                           llvm::APSInt(llvm::APInt(32, objInfo.uCols)),
+                           m_context->UnsignedIntTy)};
+      pNewType = GetOrCreateTemplateSpecialization(
+          *m_context, *m_sema, templateRecordDecl->getDescribedClassTemplate(),
+          templateArgs);
+    } else {
         DXASSERT_VALIDBASICKIND(pEltType);
         pNewType = NewSimpleAggregateType(Template[pArgument->uTemplateId],
                                           pEltType, qwQual, uRows, uCols);
@@ -7219,6 +7278,12 @@ void HLSLExternalSource::CollectInfo(QualType type, ArTypeInfo *pTypeInfo) {
                                 &pTypeInfo->uCols);
     pTypeInfo->EltKind = GetTypeElementKind(elTy);
     pTypeInfo->EltTy = pTypeInfo->EltTy = GetStructuralForm(elTy).getTypePtr();
+  } else if (IsCoopVectorBasicKind(pTypeInfo->ObjKind)) {
+  QualType elTy;
+  GetCoopVectorTemplateValues(type, &elTy, &pTypeInfo->uCols);
+  pTypeInfo->EltKind = GetTypeElementKind(elTy);
+  pTypeInfo->EltTy = pTypeInfo->EltTy = GetStructuralForm(elTy).getTypePtr();
+  pTypeInfo->uRows = 1;
   } else {
     GetRowsAndColsForAny(type, pTypeInfo->uRows, pTypeInfo->uCols);
     pTypeInfo->EltKind = pTypeInfo->ObjKind;

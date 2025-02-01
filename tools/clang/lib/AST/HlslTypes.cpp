@@ -424,7 +424,8 @@ void GetRowsAndColsForAny(QualType type, uint32_t &rowCount,
         llvm::APSInt colSize = arg2.getAsIntegral();
         rowCount = rowSize.getLimitedValue();
         colCount = colSize.getLimitedValue();
-      } else if (templateDecl->getName() == "vector") {
+      } else if (templateDecl->getName() == "vector" ||
+                 templateDecl->getName() == "CoopVector") {
         const TemplateArgumentList &argList = templateDecl->getTemplateArgs();
         const TemplateArgument &arg1 = argList[1];
         llvm::APSInt rowSize = arg1.getAsIntegral();

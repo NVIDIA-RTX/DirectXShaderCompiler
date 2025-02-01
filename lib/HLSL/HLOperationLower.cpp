@@ -6233,25 +6233,6 @@ Value *TranslateWaveMatrixMultiply(CallInst *CI, IntrinsicOp IOP,
       dxilFunc, {opArg, thisWaveMatPtr, otherWaveMatPtr1, otherWaveMatPtr2});
 }
 
-Value *TranslateCoopVectorMatrixMultiply(
-    CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
-    HLOperationLowerHelper &helper, HLObjectOperationLowerHelper *pObjHelper,
-    bool &Translated) {
-  hlsl::OP *hlslOP = &helper.hlslOP;
-
-  Value *thisWaveMatPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
-
-  IRBuilder<> Builder(CI);
-  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
-  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
-  Value *zeroVal = hlslOP->GetU32Const(0);
-  Value *buf = CI->getArgOperand(4);
-  return Builder.CreateCall(dxilFunc,
-                            {opArg, thisWaveMatPtr, zeroVal, buf, zeroVal,
-                             zeroVal, zeroVal, zeroVal, zeroVal, zeroVal});
-}
-
-
 Value *TranslateWaveMatLoadStore(CallInst *CI, IntrinsicOp IOP,
                                  OP::OpCode opcode,
                                  HLOperationLowerHelper &helper,
@@ -6373,6 +6354,141 @@ Value *TranslateCoopVecLoadStore(CallInst *CI, IntrinsicOp IOP,
   return Builder.CreateCall(dxilFunc, args);
 }
 
+Value *TranslateCoopVectorMatrixMultiply(
+    CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+    HLOperationLowerHelper &helper, HLObjectOperationLowerHelper *pObjHelper,
+    bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
+
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *zeroVal = hlslOP->GetU32Const(0);
+  Value *falseVal = hlslOP->GetI1Const(0);
+  Value *buf = CI->getArgOperand(4);
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, thisPtr, zeroVal, buf, zeroVal, zeroVal,
+                             zeroVal, zeroVal, zeroVal, falseVal, zeroVal});
+}
+Value *TranslateCoopVectorMatrixMultiplyAdd(
+    CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+    HLOperationLowerHelper &helper, HLObjectOperationLowerHelper *pObjHelper,
+    bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx);
+
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *zeroVal = hlslOP->GetU32Const(0);
+  Value *buf = CI->getArgOperand(4);
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, thisPtr, zeroVal, buf, zeroVal, zeroVal,
+                             zeroVal, zeroVal, zeroVal, zeroVal});
+}
+
+Value *TranslateCoopVectorEqualTo(CallInst *CI, IntrinsicOp IOP,
+                                  OP::OpCode opcode,
+                                  HLOperationLowerHelper &helper,
+                                  HLObjectOperationLowerHelper *pObjHelper,
+                                  bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *OtherVecPtr = CI->getArgOperand(HLOperandIndex::kCoopVecEqualToVecIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, OtherVecPtr});
+}
+
+Value *TranslateCoopVectorScalarMulAdd(CallInst *CI, IntrinsicOp IOP,
+                                       OP::OpCode opcode,
+                                       HLOperationLowerHelper &helper,
+                                       HLObjectOperationLowerHelper *pObjHelper,
+                                       bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+
+  Value *multiplier = CI->getArgOperand(HLOperandIndex::kCoopVecScalarOpOpIdx);
+  Value *addend = CI->getArgOperand(HLOperandIndex::kCoopVecScalarOpOp2Idx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, multiplier, addend});
+}
+
+Value *TranslateCoopVectorMin(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                              HLOperationLowerHelper &helper,
+                              HLObjectOperationLowerHelper *pObjHelper,
+                              bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+
+  Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecMinMaxValOpIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
+}
+
+Value *TranslateCoopVectorMax(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                              HLOperationLowerHelper &helper,
+                              HLObjectOperationLowerHelper *pObjHelper,
+                              bool &Translated) {
+
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+
+  Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecMinMaxValOpIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
+}
+
+Value *TranslateCoopVectorClamp(CallInst *CI, IntrinsicOp IOP,
+                                OP::OpCode opcode,
+                                HLOperationLowerHelper &helper,
+                                HLObjectOperationLowerHelper *pObjHelper,
+                                bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *FloorVecPtr =
+      CI->getArgOperand(HLOperandIndex::kCoopVecClampFloorValOpIdx);
+  Value *CeilVecPtr =
+      CI->getArgOperand(HLOperandIndex::kCoopVecClampCeilValOpIdx);
+
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, thisPtr, FloorVecPtr, CeilVecPtr});
+}
+
+Value *TranslateCoopVectorActivation(CallInst *CI, IntrinsicOp IOP,
+                                     OP::OpCode opcode,
+                                     HLOperationLowerHelper &helper,
+                                     HLObjectOperationLowerHelper *pObjHelper,
+                                     bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+
+  Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecActivationOpIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
+}
 
 } // namespace
 
@@ -7092,10 +7208,21 @@ IntrinsicLower gLowerTable[] = {
     {IntrinsicOp::MOP_OutputComplete, TranslateNodeOutputComplete,
      DXIL::OpCode::OutputComplete},
     {IntrinsicOp::MOP_MatMul, TranslateCoopVectorMatrixMultiply,
-     DXIL::OpCode::OutputComplete},
-    {IntrinsicOp::MOP_MatMulAdd, TranslateCoopVectorMatrixMultiply,
-     DXIL::OpCode::OutputComplete},
-
+     DXIL::OpCode::CoopVector_MatMul},
+    {IntrinsicOp::MOP_MatMulAdd, TranslateCoopVectorMatrixMultiplyAdd,
+     DXIL::OpCode::CoopVector_MatMulAdd},
+    {IntrinsicOp::MOP_EqualTo, TranslateCoopVectorEqualTo,
+     DXIL::OpCode::CoopVector_EqualTo},
+    {IntrinsicOp::MOP_ScalarMulAdd, TranslateCoopVectorScalarMulAdd,
+     DXIL::OpCode::CoopVector_ScalarMulAdd},
+    {IntrinsicOp::MOP_Min, TranslateCoopVectorMin,
+     DXIL::OpCode::CoopVector_Min},
+    {IntrinsicOp::MOP_Max, TranslateCoopVectorMax,
+     DXIL::OpCode::CoopVector_Max},
+    {IntrinsicOp::MOP_Clamp, TranslateCoopVectorClamp,
+     DXIL::OpCode::CoopVector_Clamp},
+    {IntrinsicOp::MOP_Activation, TranslateCoopVectorActivation,
+     DXIL::OpCode::CoopVector_Activation},
 
 // SPIRV change starts
 #ifdef ENABLE_SPIRV_CODEGEN
