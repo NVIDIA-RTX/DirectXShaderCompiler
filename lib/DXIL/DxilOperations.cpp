@@ -475,12 +475,17 @@ const OP::OpCodeProperty OP::m_OpCodeProps[(unsigned)OP::OpCode::NumOpCodes] = {
   {  OC::CoopVector_StoreRawBuf,  "CoopVector_StoreRawBuf",   OCC::CoopVector_StoreRawBuf,   "coopVector_StoreRawBuf",    {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
   {  OC::CoopVector_MatMul,       "CoopVector_MatMul",        OCC::CoopVector_MatMul,        "coopVector_MatMul",         {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
   {  OC::CoopVector_MatMulAdd,    "CoopVector_MatMulAdd",     OCC::CoopVector_MatMulAdd,     "coopVector_MatMulAdd",      {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
-  {  OC::CoopVector_EqualTo,      "CoopVector_EqualTo",       OCC::CoopVector_EqualTo,       "coopVector_EqualTo",        {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
+  {  OC::CoopVector_CopyFrom,     "CoopVector_CopyFrom",      OCC::CoopVector_CopyFrom,      "coopVector_CopyFrom",       {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
   {  OC::CoopVector_ScalarMulAdd, "CoopVector_ScalarMulAdd",  OCC::CoopVector_ScalarMulAdd,  "coopVector_ScalarMulAdd",   { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_Min,          "CoopVector_Min",           OCC::CoopVector_Min,           "coopVector_Min",            { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_Max,          "CoopVector_Max",           OCC::CoopVector_Max,           "coopVector_Max",            { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
+  {  OC::CoopVector_ReadFromIndex, "CoopVector_ReadFromIndex", OCC::CoopVector_ReadFromIndex, "coopVector_ReadFromIndex",  { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
+  {  OC::CoopVector_WriteToIndex, "CoopVector_WriteToIndex",  OCC::CoopVector_WriteToIndex,  "coopVector_WriteToIndex",   { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_Activation,   "CoopVector_Activation",    OCC::CoopVector_Activation,    "coopVector_Activation",     { false,  true,  true, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_Clamp,        "CoopVector_Clamp",         OCC::CoopVector_Clamp,         "coopVector_Clamp",          {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
+  {  OC::CoopVector_BitwiseOp,    "CoopVector_BitwiseOp",     OCC::CoopVector_BitwiseOp,     "coopVector_BitwiseOp",      {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::ArgMemOnly, },
+  {  OC::CoopVector_BitwiseShift, "CoopVector_BitwiseShift",  OCC::CoopVector_BitwiseShift,  "coopVector_BitwiseShift",   { false, false, false, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
+  {  OC::CoopVector_Negate,       "CoopVector_Negate",        OCC::CoopVector_Negate,        "coopVector_Negate",         { false, false, false, false, false, false, false,  true, false, false, false}, Attribute::ArgMemOnly, },
 };
 // OPCODE-OLOADS:END
 
@@ -1130,9 +1135,12 @@ void OP::GetMinShaderModelAndMask(OpCode C, bool bWithTranslation,
   // CoopVector_Index=258, CoopVector_Annotate=259, CoopVector_Fill=260,
   // CoopVector_ScalarOp=261, CoopVector_LoadRawBuf=262,
   // CoopVector_StoreRawBuf=263, CoopVector_MatMul=264, CoopVector_MatMulAdd=265,
-  // CoopVector_EqualTo=266, CoopVector_ScalarMulAdd=267, CoopVector_Min=268,
-  // CoopVector_Max=269, CoopVector_Activation=270, CoopVector_Clamp=271
-  if (op == 245 || op == 254 || (258 <= op && op <= 271)) {
+  // CoopVector_CopyFrom=266, CoopVector_ScalarMulAdd=267, CoopVector_Min=268,
+  // CoopVector_Max=269, CoopVector_ReadFromIndex=270,
+  // CoopVector_WriteToIndex=271, CoopVector_Activation=272,
+  // CoopVector_Clamp=273, CoopVector_BitwiseOp=274, CoopVector_BitwiseShift=275,
+  // CoopVector_Negate=276
+  if (op == 245 || op == 254 || (258 <= op && op <= 276)) {
     major = 6;  minor = 8;
     return;
   }
@@ -1899,12 +1907,17 @@ Function *OP::GetOpFunc(OpCode opCode, Type *pOverloadType) {
                       case OpCode::CoopVector_StoreRawBuf: A(pV);       A(pI32); A(pCoopVector);A(pRes); A(pI32); A(pI8);  break;
                       case OpCode::CoopVector_MatMul:      A(pV);       A(pI32); A(pCoopVector);A(pI32); A(pRes); A(pI32); A(pI32); A(pI32); A(pI32); A(pI32); A(pI1);  A(pI32); break;
                       case OpCode::CoopVector_MatMulAdd:   A(pV);       A(pI32); A(pCoopVector);A(pI32); A(pRes); A(pI32); A(pI32); A(pRes); A(pI32); A(pI32); A(pI32); A(pI32); A(pI32); A(pI1);  A(pI32); break;
-                      case OpCode::CoopVector_EqualTo:     A(pV);       A(pI32); A(pCoopVector);A(pCoopVector);break;
+                      case OpCode::CoopVector_CopyFrom:    A(pV);       A(pI32); A(pCoopVector);A(pCoopVector);break;
                       case OpCode::CoopVector_ScalarMulAdd:A(pV);       A(pI32); A(pCoopVector);A(pETy); A(pETy); break;
                       case OpCode::CoopVector_Min:         A(pV);       A(pI32); A(pCoopVector);A(pETy); break;
                       case OpCode::CoopVector_Max:         A(pV);       A(pI32); A(pCoopVector);A(pETy); break;
+                      case OpCode::CoopVector_ReadFromIndex:A(pETy);     A(pI32); A(pCoopVector);A(pI32); break;
+                      case OpCode::CoopVector_WriteToIndex:A(pV);       A(pI32); A(pCoopVector);A(pI32); A(pETy); break;
                       case OpCode::CoopVector_Activation:  A(pV);       A(pI32); A(pCoopVector);A(pETy); break;
                       case OpCode::CoopVector_Clamp:       A(pV);       A(pI32); A(pCoopVector);A(pCoopVector);A(pCoopVector);break;
+                      case OpCode::CoopVector_BitwiseOp:   A(pV);       A(pI32); A(pCoopVector);A(pI8);  A(pCoopVector);break;
+                      case OpCode::CoopVector_BitwiseShift:A(pV);       A(pI32); A(pCoopVector);A(pI8);  A(pETy); break;
+                      case OpCode::CoopVector_Negate:      A(pV);       A(pI32); A(pCoopVector);break;
   // OPCODE-OLOAD-FUNCS:END
   default:
     DXASSERT(false, "otherwise unhandled case");
@@ -2088,6 +2101,8 @@ llvm::Type *OP::GetOverloadType(OpCode opCode, llvm::Function *F) {
   case OpCode::ReportHit:
   case OpCode::WaveMatrix_ScalarOp:
   case OpCode::CoopVector_ScalarOp:
+  case OpCode::CoopVector_WriteToIndex:
+  case OpCode::CoopVector_BitwiseShift:
     if (FT->getNumParams() <= 3) return nullptr;
     return FT->getParamType(3);
   case OpCode::WaveMatrix_LoadGroupShared:
@@ -2170,8 +2185,9 @@ llvm::Type *OP::GetOverloadType(OpCode opCode, llvm::Function *F) {
   case OpCode::CoopVector_StoreRawBuf:
   case OpCode::CoopVector_MatMul:
   case OpCode::CoopVector_MatMulAdd:
-  case OpCode::CoopVector_EqualTo:
+  case OpCode::CoopVector_CopyFrom:
   case OpCode::CoopVector_Clamp:
+  case OpCode::CoopVector_BitwiseOp:
     return Type::getVoidTy(Ctx);
   case OpCode::CheckAccessFullyMapped:
   case OpCode::SampleIndex:
@@ -2210,6 +2226,7 @@ llvm::Type *OP::GetOverloadType(OpCode opCode, llvm::Function *F) {
   case OpCode::RayQuery_CommittedInstanceContributionToHitGroupIndex:
   case OpCode::StartVertexLocation:
   case OpCode::StartInstanceLocation:
+  case OpCode::CoopVector_Negate:
     return IntegerType::get(Ctx, 32);
   case OpCode::CalculateLOD:
   case OpCode::DomainLocation:

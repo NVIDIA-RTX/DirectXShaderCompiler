@@ -720,9 +720,16 @@ class db_dxil(object):
         for i in "CoopVector_ScalarOp,CoopVector_LoadRawBuf,CoopVector_StoreRawBuf,CoopVector_MatMul".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
-        for i in "CoopVector_MatMulAdd,CoopVector_EqualTo,CoopVector_ScalarMulAdd,CoopVector_Min,CoopVector_Max,CoopVector_Clamp,CoopVector_Activation".split(","):
+        for i in "CoopVector_MatMulAdd,CoopVector_CopyFrom,CoopVector_ScalarMulAdd,CoopVector_Min,CoopVector_Max,CoopVector_Clamp,CoopVector_Activation".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
+        for i in "CoopVector_BitwiseOp,CoopVector_BitwiseShift,CoopVector_Negate".split(","):
+            self.name_idx[i].category = "CoopVector"
+            self.name_idx[i].shader_model = 6, 8
+        for i in "CoopVector_ReadFromIndex,CoopVector_WriteToIndex".split(","):
+            self.name_idx[i].category = "CoopVector"
+            self.name_idx[i].shader_model = 6, 8
+
 
 
     def populate_llvm_instructions(self):
@@ -5838,9 +5845,9 @@ class db_dxil(object):
         )
         next_op_idx += 1
         self.add_dxil_op(
-            "CoopVector_EqualTo",
+            "CoopVector_CopyFrom",
             next_op_idx,
-            "CoopVector_EqualTo",
+            "CoopVector_CopyFrom",
             "Perform scalar operation on each element of Cooperative Vector",
             "v",
             "",
@@ -5851,6 +5858,7 @@ class db_dxil(object):
             ],
         )
         next_op_idx += 1
+
         self.add_dxil_op(
             "CoopVector_ScalarMulAdd",
             next_op_idx,
@@ -5894,6 +5902,37 @@ class db_dxil(object):
             ],
         )
         next_op_idx += 1
+
+        self.add_dxil_op(
+            "CoopVector_ReadFromIndex",
+            next_op_idx,
+            "CoopVector_ReadFromIndex",
+            "Read a Coop Vector Element at Index",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "$o", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "i32", "index", "index "),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_WriteToIndex",
+            next_op_idx,
+            "CoopVector_WriteToIndex",
+            "Write a Coop Vector Element at Index",
+            "hfi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "i32", "index", "index "),
+                db_dxil_param(4, "$o", "value", "value to write"),
+            ],
+        )
+
+        next_op_idx += 1
         self.add_dxil_op(
             "CoopVector_Activation",
             next_op_idx,
@@ -5924,9 +5963,86 @@ class db_dxil(object):
         )
         next_op_idx += 1
 
+        self.add_dxil_op(
+            "CoopVector_BitwiseOp",
+            next_op_idx,
+            "CoopVector_BitwiseOp",
+            "Perform bitwise operation on each element of Cooperative Vector",
+            "v",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(
+                    3,
+                    "i8",
+                    "op",
+                    "operation",
+                    enum_name="CoopVectorBitwiseOpCode",
+                    is_const=True,
+                ),
+                db_dxil_param(4, "coopvector", "coopvectorPtrOtherVec", "other coop vec"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_enum_type(
+            "CoopVectorBitwiseOpCode",
+            "Operation for CoopVector_BitwiseOp",
+            [
+                (0, "And", ""),
+                (1, "Or", ""),
+                (2, "Xor", ""),
+                (3, "Invalid", ""),
+            ],
+        )
+        self.add_dxil_op(
+            "CoopVector_BitwiseShift",
+            next_op_idx,
+            "CoopVector_BitwiseShift",
+            "Shift left each integer vector by given num of bits ",
+            "i",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(
+                    3,
+                    "i8",
+                    "op",
+                    "operation",
+                    enum_name="CoopVectorBitwiseShiftOpCode",
+                    is_const=True,
+                ),
+                db_dxil_param(4, "$o", "num", "num bits"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_enum_type(
+            "CoopVectorBitwiseShiftOpCode",
+            "Operation for CoopVector_BitwiseShift",
+            [
+                (0, "RightShift", ""),
+                (1, "LeftShift", ""),
+                (2, "Invalid", ""),
+            ],
+        )
+        self.add_dxil_op(
+            "CoopVector_Negate",
+            next_op_idx,
+            "CoopVector_Negate",
+            "Unary Complement",
+            "i",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+            ],
+        )
+        next_op_idx += 1
+
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 272, (
+        assert next_op_idx == 277, (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )

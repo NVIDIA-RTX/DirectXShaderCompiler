@@ -1270,11 +1270,19 @@ namespace CoopVecMethods {
 	void [[amo]] MatMul(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in bool isTranspose, in uint matStride);
 	void [[amo]] MatMulAdd(in CoopVec iVec, in uint iI, in RWByteAddressBuffer mat, in uint matOff, in uint mI, in uint M, in uint K, in uint Layout, in bool isTranspose,  in uint matStride, in RWByteAddressBuffer bias, in uint biasOff, in uint bI);
 	void [[amo]] Fill(in $match<1, -1> numeric value);
-	void [[amo]] EqualTo(in CoopVec ipVec);
+	void [[amo]] CopyFrom(in CoopVec ipVec);
+	$match<-1, -1> numeric [[amo]] ReadFromIndex(in uint index);
+	void [[amo]] WriteToIndex(in uint index, in $match<1, -1> numeric value);
 	void [[amo]] Min(in $match<1, -1> numeric value);
 	void [[amo]] Max(in $match<1, -1> numeric value);
 	void [[amo]] Clamp(in CoopVec floorVec, in CoopVec ceilVec);
 	void [[amo]] Activation(in uint op);
+	void [[amo]] BitwiseAND(in CoopVec CoopVecA);
+	void [[amo]] BitwiseOR(in CoopVec CoopVecA);
+	void [[amo]] BitwiseXOR(in CoopVec CoopVecA);
+	void [[amo]] SHL(in uint num);
+	void [[amo]] SHR(in uint num);
+	void [[amo]] NOT();
 
 } namespace
 

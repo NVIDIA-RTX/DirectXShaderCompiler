@@ -108,6 +108,7 @@ enum class HLSubscriptOpcode {
   CBufferSubscript,
   VectorSubscript, // Only for bool vector, other vector type will use GEP
                    // directly.
+  CoopVecSubscript,
 };
 
 enum class HLCastOpcode {
@@ -437,11 +438,17 @@ const unsigned kCoopVecThisOpIdx = 1;
 const unsigned kCoopVecFillScalarOpIdx = 2;
 const unsigned kCoopVecScalarOpOpIdx = 2;
 const unsigned kCoopVecScalarOpOp2Idx = 3;
+const unsigned kCoopVecBitwiseOpPtrIdx = 2;
 const unsigned kCoopVecEqualToVecIdx = 2;
 const unsigned kCoopVecMinMaxValOpIdx = 2;
 const unsigned kCoopVecClampFloorValOpIdx = 2;
 const unsigned kCoopVecClampCeilValOpIdx = 3;
 const unsigned kCoopVecActivationOpIdx = 2;
+const unsigned kCoopVecIndexOpIdx = 2;
+const unsigned kCoopVecIndexValOpIdx = 3;
+const unsigned kCoopVecBitwiseShiftTypeIdx = 2;
+const unsigned kCoopVecBitwiseShiftValIdx = 3;
+
 
 // Work Graph
 

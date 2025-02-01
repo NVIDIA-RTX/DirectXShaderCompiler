@@ -363,12 +363,21 @@ enum class IntrinsicOp {
   MOP_OutputComplete,
   MOP_MatMul,
   MOP_MatMulAdd,
-  MOP_EqualTo,
+  MOP_CopyFrom,
+  MOP_ReadFromIndex,
+  MOP_WriteToIndex,
   MOP_ScalarMulAdd,
   MOP_Min,
   MOP_Max,
   MOP_Clamp,
   MOP_Activation,
+  MOP_BitwiseAND,
+  MOP_BitwiseOR,
+  MOP_BitwiseXOR,
+  MOP_SHL,
+  MOP_SHR,
+  MOP_NOT,
+
 #ifdef ENABLE_SPIRV_CODEGEN
   MOP_SubpassLoad,
 #endif // ENABLE_SPIRV_CODEGEN

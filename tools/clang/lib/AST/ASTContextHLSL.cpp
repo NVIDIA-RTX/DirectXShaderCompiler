@@ -1190,9 +1190,19 @@ clang::CXXRecordDecl *hlsl::DeclareCoopVectorType(clang::ASTContext &context) {
   CXXRecordDecl *templateRecordDecl = typeDeclBuilder.getRecordDecl();
   // Add an 'h' field to hold the handle
   typeDeclBuilder.addField("h", GetHLSLObjectHandleType(context));
-  QualType ResultType =
+  QualType resultType =
       context.getTemplateTypeParmType(0, 0, ParameterPackFalse, TyParamDecl);
-  AddRecordSubscriptAccess(context, templateRecordDecl, ResultType, false);
+  QualType indexType = context.UnsignedIntTy;
+  CXXMethodDecl *functionDecl = CreateObjectFunctionDeclarationWithParams(
+      context, templateRecordDecl, resultType, ArrayRef<QualType>(indexType),
+      ArrayRef<StringRef>(StringRef("index")),
+      context.DeclarationNames.getCXXOperatorName(OO_Subscript), false);
+  StringRef group = GetHLOpcodeGroupName(HLOpcodeGroup::HLSubscript);
+  functionDecl->addAttr(HLSLIntrinsicAttr::CreateImplicit(
+      context, group, "",
+      static_cast<unsigned>(HLSubscriptOpcode::CoopVecSubscript)));
+  functionDecl->addAttr(HLSLCXXOverloadAttr::CreateImplicit(context));
+  // AddRecordSubscriptAccess(context, templateRecordDecl, resultType, false);
   return templateRecordDecl;
 }
 

@@ -8660,12 +8660,12 @@ struct DxilInst_CoopVector_MatMulAdd {
 };
 
 /// This instruction Perform scalar operation on each element of Cooperative Vector
-struct DxilInst_CoopVector_EqualTo {
+struct DxilInst_CoopVector_CopyFrom {
   llvm::Instruction *Instr;
   // Construction and identification
-  DxilInst_CoopVector_EqualTo(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  DxilInst_CoopVector_CopyFrom(llvm::Instruction *pInstr) : Instr(pInstr) {}
   operator bool() const {
-    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_EqualTo);
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_CopyFrom);
   }
   // Validation support
   bool isAllowed() const { return true; }
@@ -8774,6 +8774,65 @@ struct DxilInst_CoopVector_Max {
   void set_value(llvm::Value *val) { Instr->setOperand(2, val); }
 };
 
+/// This instruction Read a Coop Vector Element at Index
+struct DxilInst_CoopVector_ReadFromIndex {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_ReadFromIndex(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_ReadFromIndex);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (3 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+    arg_index = 2,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_index() const { return Instr->getOperand(2); }
+  void set_index(llvm::Value *val) { Instr->setOperand(2, val); }
+};
+
+/// This instruction Write a Coop Vector Element at Index
+struct DxilInst_CoopVector_WriteToIndex {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_WriteToIndex(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_WriteToIndex);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (4 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+    arg_index = 2,
+    arg_value = 3,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_index() const { return Instr->getOperand(2); }
+  void set_index(llvm::Value *val) { Instr->setOperand(2, val); }
+  llvm::Value *get_value() const { return Instr->getOperand(3); }
+  void set_value(llvm::Value *val) { Instr->setOperand(3, val); }
+};
+
 /// This instruction Perform scalar operation on each element of Cooperative Vector
 struct DxilInst_CoopVector_Activation {
   llvm::Instruction *Instr;
@@ -8831,6 +8890,97 @@ struct DxilInst_CoopVector_Clamp {
   void set_coopvectorPtrFlr(llvm::Value *val) { Instr->setOperand(2, val); }
   llvm::Value *get_coopvectorPtrCeil() const { return Instr->getOperand(3); }
   void set_coopvectorPtrCeil(llvm::Value *val) { Instr->setOperand(3, val); }
+};
+
+/// This instruction Perform bitwise operation on each element of Cooperative Vector
+struct DxilInst_CoopVector_BitwiseOp {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_BitwiseOp(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_BitwiseOp);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (4 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+    arg_op = 2,
+    arg_coopvectorPtrOtherVec = 3,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_op() const { return Instr->getOperand(2); }
+  void set_op(llvm::Value *val) { Instr->setOperand(2, val); }
+  int8_t get_op_val() const { return (int8_t)(llvm::dyn_cast<llvm::ConstantInt>(Instr->getOperand(2))->getZExtValue()); }
+  void set_op_val(int8_t val) { Instr->setOperand(2, llvm::Constant::getIntegerValue(llvm::IntegerType::get(Instr->getContext(), 8), llvm::APInt(8, (uint64_t)val))); }
+  llvm::Value *get_coopvectorPtrOtherVec() const { return Instr->getOperand(3); }
+  void set_coopvectorPtrOtherVec(llvm::Value *val) { Instr->setOperand(3, val); }
+};
+
+/// This instruction Shift left each integer vector by given num of bits 
+struct DxilInst_CoopVector_BitwiseShift {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_BitwiseShift(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_BitwiseShift);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (4 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+    arg_op = 2,
+    arg_num = 3,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_op() const { return Instr->getOperand(2); }
+  void set_op(llvm::Value *val) { Instr->setOperand(2, val); }
+  int8_t get_op_val() const { return (int8_t)(llvm::dyn_cast<llvm::ConstantInt>(Instr->getOperand(2))->getZExtValue()); }
+  void set_op_val(int8_t val) { Instr->setOperand(2, llvm::Constant::getIntegerValue(llvm::IntegerType::get(Instr->getContext(), 8), llvm::APInt(8, (uint64_t)val))); }
+  llvm::Value *get_num() const { return Instr->getOperand(3); }
+  void set_num(llvm::Value *val) { Instr->setOperand(3, val); }
+};
+
+/// This instruction Unary Complement
+struct DxilInst_CoopVector_Negate {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_Negate(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_Negate);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (2 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
 };
 // INSTR-HELPER:END
 } // namespace hlsl

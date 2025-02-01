@@ -625,7 +625,7 @@ const UINT g_uBasicKindProps[] = {
 
     BPROP_OBJECT | BPROP_RWBUFFER, // AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS,
     BPROP_OBJECT | BPROP_RWBUFFER, // AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS,
-    BPROP_OBJECT | BPROP_COOP_VECTOR, // AR_OBJECT_COOP_VECTOR
+    BPROP_OBJECT | BPROP_COOP_VECTOR | BPROP_RWBUFFER, // AR_OBJECT_COOP_VECTOR
 
     // AR_BASIC_MAXIMUM_COUNT
 };
@@ -1759,7 +1759,7 @@ static const SubscriptOperatorRecord g_ArBasicKindsSubscripts[] = {
 
     {1, MipsFalse, SampleFalse}, // AR_OBJECT_THREAD_NODE_OUTPUT_RECORDS
     {1, MipsFalse, SampleFalse}, // AR_OBJECT_GROUP_NODE_OUTPUT_RECORDS
-    {1, MipsFalse, SampleFalse}, // AR_OBJECT_COOP_VECTOR
+    {0, MipsFalse, SampleFalse}, // AR_OBJECT_COOP_VECTOR
 };
 
 C_ASSERT(_countof(g_ArBasicKindsAsTypes) == _countof(g_ArBasicKindsSubscripts));

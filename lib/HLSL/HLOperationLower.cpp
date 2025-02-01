@@ -6423,7 +6423,7 @@ Value *TranslateCoopVectorMatrixMultiplyAdd(
                              zeroVal, zeroVal, zeroVal, zeroVal});
 }
 
-Value *TranslateCoopVectorEqualTo(CallInst *CI, IntrinsicOp IOP,
+Value *TranslateCoopVectorCopyFrom(CallInst *CI, IntrinsicOp IOP,
                                   OP::OpCode opcode,
                                   HLOperationLowerHelper &helper,
                                   HLObjectOperationLowerHelper *pObjHelper,
@@ -6437,6 +6437,39 @@ Value *TranslateCoopVectorEqualTo(CallInst *CI, IntrinsicOp IOP,
   Value *OtherVecPtr = CI->getArgOperand(HLOperandIndex::kCoopVecEqualToVecIdx);
 
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, OtherVecPtr});
+}
+
+Value *TranslateCoopVectorReadFromIndex(
+    CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+    HLOperationLowerHelper &helper, HLObjectOperationLowerHelper *pObjHelper,
+    bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, CI->getType());
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *idx = CI->getArgOperand(HLOperandIndex::kCoopVecIndexOpIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, idx});
+}
+
+Value *TranslateCoopVectorWriteToIndex(CallInst *CI, IntrinsicOp IOP,
+                                       OP::OpCode opcode,
+                                       HLOperationLowerHelper &helper,
+                                       HLObjectOperationLowerHelper *pObjHelper,
+                                       bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *idx = CI->getArgOperand(HLOperandIndex::kCoopVecIndexOpIdx);
+  Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecIndexValOpIdx);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, val->getType());
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, idx, val});
 }
 
 Value *TranslateCoopVectorScalarMulAdd(CallInst *CI, IntrinsicOp IOP,
@@ -6521,6 +6554,90 @@ Value *TranslateCoopVectorActivation(CallInst *CI, IntrinsicOp IOP,
   Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecActivationOpIdx);
 
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
+}
+
+Value *TranslateBitWiseOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                          HLOperationLowerHelper &helper,
+                          HLObjectOperationLowerHelper *pObjHelper,
+                          bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  DXASSERT(dxilutil::IsDXILCoopVectorType(thisPtr->getType()),
+           "incorrect lowering call");
+
+  opcode = DXIL::OpCode::CoopVector_BitwiseOp;
+
+  Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecBitwiseOpPtrIdx);
+
+  DXIL::CoopVectorBitwiseOpCode Op = DXIL::CoopVectorBitwiseOpCode::Invalid;
+
+  switch (IOP) {
+  case IntrinsicOp::MOP_BitwiseAND:
+    Op = DXIL::CoopVectorBitwiseOpCode::And;
+    break;
+  case IntrinsicOp::MOP_BitwiseOR:
+    Op = DXIL::CoopVectorBitwiseOpCode::Or;
+    break;
+  case IntrinsicOp::MOP_BitwiseXOR:
+    Op = DXIL::CoopVectorBitwiseOpCode::Xor;
+    break;
+  default:
+    DXASSERT(false, "Missing case for Bitwise OR operation");
+  }
+
+  IRBuilder<> Builder(CI);
+
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, Builder.getVoidTy());
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Constant *bitwiseOpArg = hlslOP->GetU8Const((unsigned)Op);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, bitwiseOpArg, val});
+}
+
+Value *TranslateCoopVectorBitwiseShiftOp(
+    CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+    HLOperationLowerHelper &helper, HLObjectOperationLowerHelper *pObjHelper,
+    bool &Translated) {
+
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+
+  DXIL::CoopVectorBitwiseShift Op = DXIL::CoopVectorBitwiseShift::Invalid;
+
+  switch (IOP) {
+  case IntrinsicOp::MOP_SHR:
+    Op = DXIL::CoopVectorBitwiseShift::RightShift;
+    break;
+  case IntrinsicOp::MOP_SHL:
+    Op = DXIL::CoopVectorBitwiseShift::LeftShift;
+    break;
+  default:
+    DXASSERT(false, "Missing case for Bitwise Shift operation");
+  }
+
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Constant *bitwiseOpArg = hlslOP->GetU8Const((unsigned)Op);
+  Value *numBits =
+      CI->getArgOperand(HLOperandIndex::kCoopVecBitwiseShiftValIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, bitwiseOpArg, numBits});
+}
+
+Value *TranslateCoopVectorNegate(CallInst *CI, IntrinsicOp IOP,
+                                 OP::OpCode opcode,
+                                 HLOperationLowerHelper &helper,
+                                 HLObjectOperationLowerHelper *pObjHelper,
+                                 bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr});
 }
 
 } // namespace
@@ -7244,8 +7361,12 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::CoopVector_MatMul},
     {IntrinsicOp::MOP_MatMulAdd, TranslateCoopVectorMatrixMultiplyAdd,
      DXIL::OpCode::CoopVector_MatMulAdd},
-    {IntrinsicOp::MOP_EqualTo, TranslateCoopVectorEqualTo,
-     DXIL::OpCode::CoopVector_EqualTo},
+    {IntrinsicOp::MOP_CopyFrom, TranslateCoopVectorCopyFrom,
+     DXIL::OpCode::CoopVector_CopyFrom},
+    {IntrinsicOp::MOP_ReadFromIndex, TranslateCoopVectorReadFromIndex,
+     DXIL::OpCode::CoopVector_ReadFromIndex},
+    {IntrinsicOp::MOP_WriteToIndex, TranslateCoopVectorWriteToIndex,
+     DXIL::OpCode::CoopVector_WriteToIndex},
     {IntrinsicOp::MOP_ScalarMulAdd, TranslateCoopVectorScalarMulAdd,
      DXIL::OpCode::CoopVector_ScalarMulAdd},
     {IntrinsicOp::MOP_Min, TranslateCoopVectorMin,
@@ -7256,6 +7377,18 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::CoopVector_Clamp},
     {IntrinsicOp::MOP_Activation, TranslateCoopVectorActivation,
      DXIL::OpCode::CoopVector_Activation},
+    {IntrinsicOp::MOP_BitwiseAND, TranslateBitWiseOp,
+     DXIL::OpCode::CoopVector_BitwiseOp},
+    {IntrinsicOp::MOP_BitwiseOR, TranslateBitWiseOp,
+     DXIL::OpCode::CoopVector_BitwiseOp},
+    {IntrinsicOp::MOP_BitwiseXOR, TranslateBitWiseOp,
+     DXIL::OpCode::CoopVector_BitwiseOp},
+    {IntrinsicOp::MOP_SHL, TranslateCoopVectorBitwiseShiftOp,
+     DXIL::OpCode::CoopVector_BitwiseShift},
+    {IntrinsicOp::MOP_SHR, TranslateCoopVectorBitwiseShiftOp,
+     DXIL::OpCode::CoopVector_BitwiseShift},
+    {IntrinsicOp::MOP_NOT, TranslateCoopVectorNegate,
+     DXIL::OpCode::CoopVector_Negate},
 
 // SPIRV change starts
 #ifdef ENABLE_SPIRV_CODEGEN
@@ -9338,6 +9471,17 @@ void TranslateHLSubscript(CallInst *CI, HLSubscriptOpcode opcode,
     if (ptr->getType() == hlslOP->GetNodeRecordHandleType()) {
       DXASSERT(false, "Shouldn't get here, NodeRecord subscripts should have "
                       "been lowered in LowerRecordAccessToGetNodeRecordPtr");
+      return;
+    }
+    if (ptr->getType() == hlslOP->GetCoopVecPtrType()) {
+      IRBuilder<> Builder(CI);
+      Value *vec = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+      Value *opArg = Builder.getInt32((unsigned)DXIL::OpCode::CoopVector_Index);
+      Value *idx = CI->getArgOperand(HLOperandIndex::kCoopVecIndexOpIdx);
+      Function *IndexCoopVec = helper.hlslOP.GetOpFunc(
+          DXIL::OpCode::CoopVector_Index, Builder.getVoidTy());
+      Value *args[] = {opArg, vec, idx};
+      Builder.CreateCall(IndexCoopVec, args);
       return;
     }
     if (ptr->getType() == HandleTy) {
