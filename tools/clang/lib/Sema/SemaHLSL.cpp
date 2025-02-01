@@ -2442,6 +2442,11 @@ static void GetIntrinsicMethods(ArBasicKind kind,
     *intrinsics = g_GroupOrThreadNodeOutputRecordsMethods;
     *intrinsicCount = _countof(g_GroupOrThreadNodeOutputRecordsMethods);
     break;
+  case AR_OBJECT_COOP_VECTOR:
+   *intrinsics = g_CoopVecMethods;
+   *intrinsicCount = _countof(g_CoopVecMethods);
+    break;
+
 
     // SPIRV change starts
 #ifdef ENABLE_SPIRV_CODEGEN

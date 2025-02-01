@@ -1042,3 +1042,142 @@ INITIALIZE_PASS(LowerWaveMatType, "hlsl-lower-wavematrix-type",
 ModulePass *llvm::createLowerWaveMatTypePass() {
   return new LowerWaveMatType();
 }
+
+//===----------------------------------------------------------------------===//
+// Lower Cooperative Vector types to single dxil type.
+//===----------------------------------------------------------------------===//
+
+namespace {
+
+class LowerCoopVectorType : public LowerTypePass {
+public:
+  explicit LowerCoopVectorType() : LowerTypePass(ID) {}
+  static char ID; // Pass identification, replacement for typeid
+protected:
+  bool needToLower(Value *V) override;
+  void lowerUseWithNewValue(Value *V, Value *NewV) override;
+  Type *lowerType(Type *Ty) override;
+  Constant *lowerInitVal(Constant *InitVal, Type *NewTy) override;
+  StringRef getGlobalPrefix() override { return ".res"; }
+  void initialize(Module &M) override;
+
+private:
+  void lowerUserWithNewValue(User *U, Value *V, Value *NewV);
+
+  Type *m_CoopVecTy = nullptr;
+  HLModule *m_pHLM = nullptr;
+};
+
+void LowerCoopVectorType::initialize(Module &M) {
+  DXASSERT(M.HasHLModule(), "requireHLModule");
+  m_pHLM = &M.GetHLModule();
+  m_CoopVecTy = m_pHLM->GetOP()->GetCoopVecPtrType()->getPointerElementType();
+}
+
+bool LowerCoopVectorType::needToLower(Value *V) {
+  return dxilutil::IsHLSLCoopVectorType(dxilutil::GetArrayEltTy(V->getType()));
+}
+
+Type *LowerCoopVectorType::lowerType(Type *Ty) {
+  if (Ty->isPointerTy()) {
+    return PointerType::get(lowerType(Ty->getPointerElementType()),
+                            Ty->getPointerAddressSpace());
+  } else if (Ty->isArrayTy()) {
+    DXASSERT(0, "To be implemented");
+  } else if (dxilutil::IsHLSLCoopVectorType(Ty)) {
+    return m_CoopVecTy;
+  }
+  DXASSERT(0, "unexpected cooperative vector type to lower");
+  return Ty;
+}
+
+Constant *LowerCoopVectorType::lowerInitVal(Constant *InitVal, Type *NewTy) {
+  DXASSERT(isa<UndefValue>(InitVal), "coop vector cannot have real init val");
+  return UndefValue::get(NewTy);
+}
+
+// Rewrite call, replaceing argument with new Type
+/* static CallInst *RewriteIntrinsicCallForNewArg(CallInst *CI, Value *OldV,
+    Value* NewV,
+    Type* NewRet = nullptr) {
+
+    Function *F = CI->getCalledFunction();
+    HLOpcodeGroup group = GetHLOpcodeGroupByName(F);
+    unsigned opcode = GetHLOpcode(CI);
+
+   SmallVector<Type *, 8> newArgTypes(CI->getFunctionType()->param_begin(),
+                                       CI->getFunctionType()->param_end());
+    SmallVector<Value *, 8> newArgs(CI->arg_operands());
+
+    for (unsigned i = 1; i < newArgs.size(); i++) {
+        if (newArgs[i] == OldV) {
+      newArgTypes[i] = NewV->getType();
+      newArgs[i] = NewV;
+        }
+    }
+
+    if (NewRet == nullptr)
+        NewRet = CI->getType();
+
+    FunctionType *newFuncTy = FunctionType::get(NewRet, newArgTypes, false);
+    Function *newF =
+        GetOrCreateHLFunction(*F->getParent(), newFuncTy, group, opcode,
+                              F->getAttributes().getFnAttributes());
+    IRBuilder<> Builder(CI);
+    return Builder.CreateCall(newF, newArgs);
+}*/
+
+void LowerCoopVectorType::lowerUserWithNewValue(User *U, Value *V,
+                                                Value *NewV) {
+  if (CallInst *CI = dyn_cast<CallInst>(U)) {
+    HLOpcodeGroup group = GetHLOpcodeGroupByName(CI->getCalledFunction());
+    // TODO:: Add check for HLAnnotate_CoopVector
+    if (group == HLOpcodeGroup::HLIntrinsic) {
+      Type *NewRet = needToLower(CI) ? lowerType(CI->getType()) : nullptr;
+      Value *NewU = RewriteIntrinsicCallForNewArg(CI, V, NewV, NewRet);
+      if (!U->user_empty()) {
+        if (NewRet)
+          lowerUseWithNewValue(U, NewU);
+        else
+          U->replaceAllUsesWith(NewU);
+      }
+      return;
+    }
+  } else if (BitCastInst *BI = dyn_cast<BitCastInst>(U)) {
+    BI->setOperand(0, NewV);
+    return;
+  }
+  DXASSERT(0, "invalid operation on CoopVec pointer");
+}
+
+void LowerCoopVectorType::lowerUseWithNewValue(Value *V, Value *NewV) {
+  SmallVector<Instruction *, 4> deadInsts;
+  for (auto it = V->user_begin(); it != V->user_end();) {
+    User *U = *it;
+    // Prevent double User iteration when multiple Uses in same User
+    while (it != V->user_end() && *it == U)
+      ++it;
+    if (GEPOperator *GEP = dyn_cast<GEPOperator>(U)) {
+      if (!GEP->user_empty())
+        lowerUseWithNewValue(U, dxilutil::MirrorGEP(GEP, NewV));
+    } else {
+      lowerUserWithNewValue(U, V, NewV);
+    }
+    if (Instruction *I = dyn_cast<Instruction>(U))
+      if (I->user_empty())
+        deadInsts.push_back(I);
+  }
+  for (auto I : deadInsts)
+    I->eraseFromParent();
+}
+
+} // namespace
+
+char LowerCoopVectorType::ID = 0;
+
+INITIALIZE_PASS(LowerCoopVectorType, "hlsl-lower-coopvector-type",
+                "Lower Cooperative Vector types to dxil type", false, false)
+
+ModulePass *llvm::createLowerCoopVectorTypePass() {
+  return new LowerCoopVectorType();
+}

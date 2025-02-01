@@ -164,6 +164,7 @@ bool IsHLSLObjectType(llvm::Type *Ty);
 bool IsHLSLRayQueryType(llvm::Type *Ty);
 bool IsHLSLWaveMatrixType(llvm::Type *Ty,
                           DXIL::WaveMatrixKind *pKind = nullptr);
+bool IsHLSLCoopVectorType(llvm::Type *Ty);
 bool IsHLSLResourceDescType(llvm::Type *Ty);
 bool IsResourceSingleComponent(llvm::Type *Ty);
 uint8_t GetResourceComponentCount(llvm::Type *Ty);

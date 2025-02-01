@@ -1244,6 +1244,32 @@ namespace GroupOrThreadNodeOutputRecordsMethods {
     void [[]] OutputComplete();
 } namespace
 
+// CoopVec Methods
+namespace CoopVecMethods {
+	void [[]] Load(in ByteAddressBuffer buffer, in uint startOffsetInBytes);
+	void [[]] Load(in ByteAddressBuffer buffer, in uint startOffsetInBytes, in uint alignment);
+	void [[]] Load(in RWByteAddressBuffer buffer, in uint startOffsetInBytes);
+	void [[]] Load(in RWByteAddressBuffer buffer, in uint startOffsetInBytes, in uint alignment);
+	void [[]] Store(in ByteAddressBuffer buffer, in uint startOffsetInBytes);
+	void [[]] Store(in ByteAddressBuffer buffer, in uint startOffsetInBytes, in uint alignment);
+	void [[]] Store(in RWByteAddressBuffer buffer, in uint startOffsetInBytes);
+	void [[]] Store(in RWByteAddressBuffer buffer, in uint startOffsetInBytes, in uint alignment);
+
+	// input/output must be an array in groupshared memory
+	void [[amo]] Load(in groupshared $match<1, -1> numeric[] input, in uint startOffsetInArrayElements);
+	void [[amo]] Store(out groupshared $match<1, -1> numeric[] output, in uint startOffsetInArrayElements);
+
+	void [[amo]] ScalarMultiply(in $match<1, -1> numeric value);
+	void [[amo]] ScalarDivide(in $match<1, -1> numeric value);
+	void [[amo]] ScalarAdd(in $match<1, -1> numeric value);
+	void [[amo]] ScalarSubtract(in $match<1, -1> numeric value);
+
+	void [[amo]] Add(in CoopVec VecA);
+	void [[amo]] Multiply(in CoopVec VecA);
+
+} namespace
+
+
 // SPIRV Change Starts
 
 namespace VkSubpassInputMethods {

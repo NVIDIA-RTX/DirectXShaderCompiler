@@ -292,6 +292,8 @@ void PassManagerBuilder::addHLSLPasses(legacy::PassManagerBase &MPM) {
   // Translate HL WaveMatrix ptrs to final dxil type
   MPM.add(createLowerWaveMatTypePass());
 
+  MPM.add(createLowerCoopVectorTypePass());
+
   MPM.add(createDxilGenerationPass(NoOpt, this->HLSLExtensionsCodeGen));
 
   // Propagate precise attribute.

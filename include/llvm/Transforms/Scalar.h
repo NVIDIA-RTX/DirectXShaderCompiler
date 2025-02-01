@@ -191,6 +191,12 @@ ModulePass *createLowerWaveMatTypePass();
 void initializeLowerWaveMatTypePass(PassRegistry &);
 
 //===----------------------------------------------------------------------===//
+// Convert HL CoopVector ptr to DXIL types
+//
+ModulePass *createLowerCoopVectorTypePass();
+void initializeLowerCoopVectorTypePass(PassRegistry &);
+
+//===----------------------------------------------------------------------===//
 // Hoist a local array initialized with constant values to a global array with
 // a constant initializer.
 //
