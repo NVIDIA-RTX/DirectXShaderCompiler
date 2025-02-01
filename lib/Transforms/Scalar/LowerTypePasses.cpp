@@ -1147,7 +1147,14 @@ void LowerCoopVectorType::lowerUserWithNewValue(User *U, Value *V,
   } else if (BitCastInst *BI = dyn_cast<BitCastInst>(U)) {
     BI->setOperand(0, NewV);
     return;
+  } else if (LoadInst *LI = dyn_cast<LoadInst>(U)) {
+  LI->setOperand(LI->getPointerOperandIndex(), NewV);
+  return;
+  } else if (StoreInst *SI = dyn_cast<StoreInst>(U)) {
+  SI->setOperand(SI->getPointerOperandIndex(), NewV);
+  return;
   }
+
   DXASSERT(0, "invalid operation on CoopVec pointer");
 }
 
