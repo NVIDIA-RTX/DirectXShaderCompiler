@@ -1259,11 +1259,17 @@ namespace CoopVecMethods {
 	void [[amo]] Load(in groupshared $match<1, -1> numeric[] input, in uint startOffsetInArrayElements);
 	void [[amo]] Store(out groupshared $match<1, -1> numeric[] output, in uint startOffsetInArrayElements);
 
-	void [[amo]] ScalarMultiply(in $match<1, -1> numeric value);
-	void [[amo]] ScalarDivide(in $match<1, -1> numeric value);
 	void [[amo]] ScalarAdd(in $match<1, -1> numeric value);
 	void [[amo]] ScalarSubtract(in $match<1, -1> numeric value);
-	void [[amo]] ScalarMulAdd(in $match<1, -1> numeric multiplier, in $match<1, -1> numeric addend);
+	void [[amo]] ScalarMultiply(in $match<1, -1> numeric value);
+	void [[amo]] ScalarDivide(in $match<1, -1> numeric value);
+	void [[amo]] ScalarMod(in $match<1, -1> numeric value);
+
+	void [[amo]] Add(in CoopVec VecA);
+	void [[amo]] Subtract(in CoopVec VecA);
+	void [[amo]] Multiply(in CoopVec VecA);
+	void [[amo]] Divide(in CoopVec VecA);
+	void [[amo]] Mod(in CoopVec VecA);
 
 	void [[amo]] Add(in CoopVec VecA);
 	void [[amo]] Multiply(in CoopVec VecA);
@@ -1280,6 +1286,10 @@ namespace CoopVecMethods {
 	void [[amo]] BitwiseAND(in CoopVec CoopVecA);
 	void [[amo]] BitwiseOR(in CoopVec CoopVecA);
 	void [[amo]] BitwiseXOR(in CoopVec CoopVecA);
+	void [[amo]] ScalarBitwiseAND(in uint value);
+	void [[amo]] ScalarBitwiseOR(in uint value);
+	void [[amo]] ScalarBitwiseXOR(in uint value);
+
 	void [[amo]] SHL(in uint num);
 	void [[amo]] SHR(in uint num);
 	void [[amo]] NOT();

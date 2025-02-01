@@ -439,6 +439,7 @@ const unsigned kCoopVecFillScalarOpIdx = 2;
 const unsigned kCoopVecScalarOpOpIdx = 2;
 const unsigned kCoopVecScalarOpOp2Idx = 3;
 const unsigned kCoopVecBitwiseOpPtrIdx = 2;
+const unsigned kCoopVecBitwiseOpScalarValIdx = 2;
 const unsigned kCoopVecEqualToVecIdx = 2;
 const unsigned kCoopVecMinMaxValOpIdx = 2;
 const unsigned kCoopVecClampFloorValOpIdx = 2;
@@ -447,6 +448,7 @@ const unsigned kCoopVecActivationOpIdx = 2;
 const unsigned kCoopVecIndexOpIdx = 2;
 const unsigned kCoopVecIndexValOpIdx = 3;
 const unsigned kCoopVecBitwiseShiftValIdx = 2;
+const unsigned kCoopVecArithmeticOpOperandIdx = 2;
 
 // Work Graph
 

@@ -5755,7 +5755,44 @@ class db_dxil(object):
                 (1, "Subtract", ""),
                 (2, "Multiply", ""),
                 (3, "Divide", ""),
-                (4, "Invalid", ""),
+                (4, "Modulus", ""),
+                (5, "Invalid", ""),
+            ],
+        )
+
+        self.add_dxil_op(
+            "CoopVector_ArithmeticOp",
+            next_op_idx,
+            "CoopVector_ArithmeticOp",
+            "Elementwise Arithmetic Op",
+            "v",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtrA", "Coop Vector pointer"),
+                db_dxil_param(3, "coopvector", "coopvectorPtrB", "Coop Vector pointer"),
+                db_dxil_param(
+                    4,
+                    "i8",
+                    "op",
+                    "operation",
+                    enum_name="CoopVectorArithmeticOpCode",
+                    is_const=True,
+                ),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_enum_type(
+            "CoopVectorArithmeticOpCode",
+            "Operation for CoopVector_ArithmeticOp",
+            [
+                (0, "Add", ""),
+                (1, "Subtract", ""),
+                (2, "Multiply", ""),
+                (3, "Divide", ""),
+                (4, "Modulus", ""),
+                (5, "Invalid", ""),
             ],
         )
 
@@ -5995,6 +6032,41 @@ class db_dxil(object):
                 (3, "Invalid", ""),
             ],
         )
+
+        self.add_dxil_op(
+            "CoopVector_ScalarBitwiseOp",
+            next_op_idx,
+            "CoopVector_ScalarBitwiseOp",
+            "Perform Scalar bitwise operation on each element of Cooperative Vector",
+            "18wil",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(
+                    3,
+                    "i8",
+                    "op",
+                    "operation",
+                    enum_name="CoopVectorScalarBitwiseOpCode",
+                    is_const=True,
+                ),
+               db_dxil_param(4, "$o", "value", "scalar value"),
+            ],
+        )
+
+        next_op_idx += 1
+        self.add_enum_type(
+            "CoopVectorScalarBitwiseOpCode",
+            "Operation for CoopVector_BitwiseOp",
+            [
+                (0, "And", ""),
+                (1, "Or", ""),
+                (2, "Xor", ""),
+                (3, "Invalid", ""),
+            ],
+        )
+
         self.add_dxil_op(
             "CoopVector_BitwiseShift",
             next_op_idx,
@@ -6042,7 +6114,7 @@ class db_dxil(object):
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 277, (
+        assert next_op_idx == 279, (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )

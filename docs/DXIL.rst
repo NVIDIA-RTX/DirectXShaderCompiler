@@ -2373,21 +2373,23 @@ ID  Name                                                  Description
 259 CoopVector_Annotate                                   Annotate a wave matrix pointer with the type information
 260 CoopVector_Fill                                       Fill coopvector with scalar value
 261 CoopVector_ScalarOp                                   Perform scalar operation on each element of Cooperative Vector
-262 CoopVector_LoadRawBuf                                 Load coop vector from raw buffer
-263 CoopVector_StoreRawBuf                                Store wave matrix to raw buffer
-264 CoopVector_MatMul                                     Vector Matrix Multiply
-265 CoopVector_MatMulAdd                                  Vector Matrix Multiply
-266 CoopVector_CopyFrom                                   Perform scalar operation on each element of Cooperative Vector
-267 CoopVector_ScalarMulAdd                               Perform scalar operation on each element of Cooperative Vector
-268 CoopVector_Min                                        Perform scalar operation on each element of Cooperative Vector
-269 CoopVector_Max                                        Perform scalar operation on each element of Cooperative Vector
-270 CoopVector_ReadFromIndex                              Read a Coop Vector Element at Index
-271 CoopVector_WriteToIndex                               Write a Coop Vector Element at Index
-272 CoopVector_Activation                                 Perform scalar operation on each element of Cooperative Vector
-273 CoopVector_Clamp                                      Perform scalar operation on each element of Cooperative Vector
-274 CoopVector_BitwiseOp                                  Perform bitwise operation on each element of Cooperative Vector
-275 CoopVector_BitwiseShift                               Shift left each integer vector by given num of bits
-276 CoopVector_Negate                                     Unary Complement
+262 CoopVector_ArithmeticOp                               Elementwise Arithmetic Op
+263 CoopVector_LoadRawBuf                                 Load coop vector from raw buffer
+264 CoopVector_StoreRawBuf                                Store wave matrix to raw buffer
+265 CoopVector_MatMul                                     Vector Matrix Multiply
+266 CoopVector_MatMulAdd                                  Vector Matrix Multiply
+267 CoopVector_CopyFrom                                   Perform scalar operation on each element of Cooperative Vector
+268 CoopVector_ScalarMulAdd                               Perform scalar operation on each element of Cooperative Vector
+269 CoopVector_Min                                        Perform scalar operation on each element of Cooperative Vector
+270 CoopVector_Max                                        Perform scalar operation on each element of Cooperative Vector
+271 CoopVector_ReadFromIndex                              Read a Coop Vector Element at Index
+272 CoopVector_WriteToIndex                               Write a Coop Vector Element at Index
+273 CoopVector_Activation                                 Perform scalar operation on each element of Cooperative Vector
+274 CoopVector_Clamp                                      Perform scalar operation on each element of Cooperative Vector
+275 CoopVector_BitwiseOp                                  Perform bitwise operation on each element of Cooperative Vector
+276 CoopVector_ScalarBitwiseOp                            Perform Scalar bitwise operation on each element of Cooperative Vector
+277 CoopVector_BitwiseShift                               Shift left each integer vector by given num of bits
+278 CoopVector_Negate                                     Unary Complement
 === ===================================================== =======================================================================================================================================================================================================================
 
 

@@ -6210,6 +6210,10 @@ Value *TranslateScalarOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
     WMScalarOp = DXIL::WaveMatrixScalarOpCode::Divide;
     CVScalarOp = DXIL::CoopVectorScalarOpCode::Divide;
     break;
+  case IntrinsicOp::MOP_ScalarMod:
+    WMScalarOp = DXIL::WaveMatrixScalarOpCode::Invalid;
+    CVScalarOp = DXIL::CoopVectorScalarOpCode::Modulus;
+    break;
   default:
     DXASSERT(false, "Missing case for WaveMatrix scalar operation");
   }
@@ -6490,6 +6494,83 @@ Value *TranslateCoopVectorScalarMulAdd(CallInst *CI, IntrinsicOp IOP,
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, multiplier, addend});
 }
 
+Value *TranslateArithmeticOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                             HLOperationLowerHelper &helper,
+                             HLObjectOperationLowerHelper *pObjHelper,
+                             bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  bool isCoopVec = false;
+  bool isWaveMatrix = false;
+
+  if (dxilutil::IsDXILCoopVectorType(thisPtr->getType())) {
+    isCoopVec = true;
+  } else if (dxilutil::IsHLSLWaveMatrixType(thisPtr->getType())) {
+    isWaveMatrix = true;
+  } else {
+    DXASSERT(false, "Shouldn't get here");
+  }
+
+  OP::OpCode CV_opcode;
+  OP::OpCode WM_opcode;
+
+  DXIL::CoopVectorArithmeticOpCode CVOp =
+      DXIL::CoopVectorArithmeticOpCode::Invalid;
+
+  switch (IOP) {
+  case IntrinsicOp::MOP_Add:
+    CVOp = DXIL::CoopVectorArithmeticOpCode::Add;
+    CV_opcode = DXIL::OpCode::CoopVector_ArithmeticOp;
+    WM_opcode = DXIL::OpCode::WaveMatrix_Add;
+    break;
+  case IntrinsicOp::MOP_Subtract:
+    CVOp = DXIL::CoopVectorArithmeticOpCode::Subtract;
+    CV_opcode = DXIL::OpCode::CoopVector_ArithmeticOp;
+    WM_opcode = DXIL::OpCode::NumOpCodes;
+    break;
+  case IntrinsicOp::MOP_Multiply:
+    CVOp = DXIL::CoopVectorArithmeticOpCode::Multiply;
+    CV_opcode = DXIL::OpCode::CoopVector_ArithmeticOp;
+    WM_opcode = DXIL::OpCode::WaveMatrix_Multiply;
+    break;
+  case IntrinsicOp::MOP_Divide:
+    CVOp = DXIL::CoopVectorArithmeticOpCode::Divide;
+    CV_opcode = DXIL::OpCode::CoopVector_ArithmeticOp;
+    WM_opcode = DXIL::OpCode::NumOpCodes;
+    break;
+  case IntrinsicOp::MOP_Mod:
+    CVOp = DXIL::CoopVectorArithmeticOpCode::Modulus;
+    CV_opcode = DXIL::OpCode::CoopVector_ArithmeticOp;
+    WM_opcode = DXIL::OpCode::NumOpCodes;
+    break;
+  default:
+    DXASSERT(false, "Missing case for Bitwise OR operation");
+  }
+
+  if (isWaveMatrix) {
+    DXASSERT(WM_opcode != DXIL::OpCode::NumOpCodes,
+             "Only Add and Multiply supported for WM");
+  }
+
+  IRBuilder<> Builder(CI);
+
+  if (isCoopVec) {
+    Function *dxilFunc = hlslOP->GetOpFunc(CV_opcode, Builder.getVoidTy());
+    Constant *opArg = hlslOP->GetU32Const((unsigned)CV_opcode);
+    Constant *ArithmeticOpArg = hlslOP->GetU8Const((unsigned)CVOp);
+    Value *operand =
+        CI->getArgOperand(HLOperandIndex::kCoopVecArithmeticOpOperandIdx);
+    return Builder.CreateCall(dxilFunc,
+                              {opArg, thisPtr, operand, ArithmeticOpArg});
+  } else {
+    Function *dxilFunc = hlslOP->GetOpFunc(WM_opcode, Builder.getVoidTy());
+    Constant *opArg = hlslOP->GetU32Const((unsigned)WM_opcode);
+    Value *operand = CI->getArgOperand(HLOperandIndex::kWaveMatOther1OpIdx);
+    return Builder.CreateCall(dxilFunc, {opArg, thisPtr, operand});
+  }
+}
+
 Value *TranslateCoopVectorMin(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
                               HLOperationLowerHelper &helper,
                               HLObjectOperationLowerHelper *pObjHelper,
@@ -6590,6 +6671,47 @@ Value *TranslateBitWiseOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
   IRBuilder<> Builder(CI);
 
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, Builder.getVoidTy());
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Constant *bitwiseOpArg = hlslOP->GetU8Const((unsigned)Op);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, bitwiseOpArg, val});
+}
+
+Value *TranslateScalarBitWiseOp(CallInst *CI, IntrinsicOp IOP,
+                                OP::OpCode opcode,
+                                HLOperationLowerHelper &helper,
+                                HLObjectOperationLowerHelper *pObjHelper,
+                                bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  DXASSERT(dxilutil::IsDXILCoopVectorType(thisPtr->getType()),
+           "incorrect lowering call");
+
+  opcode = DXIL::OpCode::CoopVector_ScalarBitwiseOp;
+
+  Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecBitwiseOpScalarValIdx);
+
+  DXIL::CoopVectorScalarBitwiseOpCode Op =
+      DXIL::CoopVectorScalarBitwiseOpCode::Invalid;
+
+  switch (IOP) {
+  case IntrinsicOp::MOP_ScalarBitwiseAND:
+    Op = DXIL::CoopVectorScalarBitwiseOpCode::And;
+    break;
+  case IntrinsicOp::MOP_ScalarBitwiseOR:
+    Op = DXIL::CoopVectorScalarBitwiseOpCode::Or;
+    break;
+  case IntrinsicOp::MOP_ScalarBitwiseXOR:
+    Op = DXIL::CoopVectorScalarBitwiseOpCode::Xor;
+    break;
+  default:
+    DXASSERT(false, "Missing case for Scalar Bitwise operation");
+  }
+
+  IRBuilder<> Builder(CI);
+
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, val->getType());
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
   Constant *bitwiseOpArg = hlslOP->GetU8Const((unsigned)Op);
 
@@ -7329,12 +7451,20 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::WaveMatrix_ScalarOp},
     {IntrinsicOp::MOP_ScalarSubtract, TranslateScalarOp,
      DXIL::OpCode::WaveMatrix_ScalarOp},
+    {IntrinsicOp::MOP_ScalarMod, TranslateScalarOp,
+     DXIL::OpCode::WaveMatrix_ScalarOp},
     {IntrinsicOp::MOP_SumAccumulate, TranslateWaveMatrix_Accumulate,
      DXIL::OpCode::WaveMatrix_SumAccumulate},
-    {IntrinsicOp::MOP_Add, TranslateWaveMatrix_Accumulate,
-     DXIL::OpCode::WaveMatrix_Add},
-    {IntrinsicOp::MOP_Multiply, TranslateWaveMatrixMultiply,
-     DXIL::OpCode::WaveMatrix_Multiply},
+    {IntrinsicOp::MOP_Add, TranslateArithmeticOp, 
+     DXIL::OpCode::NumOpCodes},
+    {IntrinsicOp::MOP_Multiply, TranslateArithmeticOp,
+     DXIL::OpCode::NumOpCodes},
+    {IntrinsicOp::MOP_Divide, TranslateArithmeticOp, 
+     DXIL::OpCode::NumOpCodes},
+    {IntrinsicOp::MOP_Subtract, TranslateArithmeticOp,
+     DXIL::OpCode::NumOpCodes},
+    {IntrinsicOp::MOP_Mod, TranslateArithmeticOp, 
+     DXIL::OpCode::NumOpCodes},
     {IntrinsicOp::MOP_MultiplyAccumulate, TranslateWaveMatrixMultiply,
      DXIL::OpCode::WaveMatrix_MultiplyAccumulate},
     {IntrinsicOp::MOP_Count, TranslateNodeGetInputRecordCount,
@@ -7368,8 +7498,6 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::CoopVector_ReadFromIndex},
     {IntrinsicOp::MOP_WriteToIndex, TranslateCoopVectorWriteToIndex,
      DXIL::OpCode::CoopVector_WriteToIndex},
-    {IntrinsicOp::MOP_ScalarMulAdd, TranslateCoopVectorScalarMulAdd,
-     DXIL::OpCode::CoopVector_ScalarMulAdd},
     {IntrinsicOp::MOP_Min, TranslateCoopVectorMin,
      DXIL::OpCode::CoopVector_Min},
     {IntrinsicOp::MOP_Max, TranslateCoopVectorMax,
@@ -7384,6 +7512,12 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::CoopVector_BitwiseOp},
     {IntrinsicOp::MOP_BitwiseXOR, TranslateBitWiseOp,
      DXIL::OpCode::CoopVector_BitwiseOp},
+    {IntrinsicOp::MOP_ScalarBitwiseAND, TranslateScalarBitWiseOp,
+     DXIL::OpCode::CoopVector_ScalarBitwiseOp},
+    {IntrinsicOp::MOP_ScalarBitwiseOR, TranslateScalarBitWiseOp,
+     DXIL::OpCode::CoopVector_ScalarBitwiseOp},
+    {IntrinsicOp::MOP_ScalarBitwiseXOR, TranslateScalarBitWiseOp,
+     DXIL::OpCode::CoopVector_ScalarBitwiseOp},
     {IntrinsicOp::MOP_SHL, TranslateCoopVectorBitwiseShiftOp,
      DXIL::OpCode::CoopVector_BitwiseShift},
     {IntrinsicOp::MOP_SHR, TranslateCoopVectorBitwiseShiftOp,
