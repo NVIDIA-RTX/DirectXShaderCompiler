@@ -2346,7 +2346,7 @@ ID  Name                                                  Description
 232 WaveMatrix_StoreGroupShared                           Store wave matrix to group shared array
 233 WaveMatrix_Multiply                                   Mutiply left and right wave matrix and store in accumulator
 234 WaveMatrix_MultiplyAccumulate                         Mutiply left and right wave matrix and accumulate into accumulator
-235 WaveMatrix_ScalarOp                                   Perform scalar operation on each element of wave matrix
+235 WaveMatrix_ScalarOp                                   Perform clamp operation on each element of wave matrix
 236 WaveMatrix_SumAccumulate                              Sum rows or columns of an input matrix into an existing accumulator fragment matrix
 237 WaveMatrix_Add                                        Element-wise accumulate, or broadcast add of fragment into accumulator
 238 AllocateNodeOutputRecords                             returns a handle for the output records
@@ -2390,10 +2390,11 @@ ID  Name                                                  Description
 276 CoopVector_WriteToIndex                               Write a Coop Vector Element at Index
 277 CoopVector_Activation                                 Perform scalar operation on each element of Cooperative Vector
 278 CoopVector_Clamp                                      Perform scalar operation on each element of Cooperative Vector
-279 CoopVector_BitwiseOp                                  Perform bitwise operation on each element of Cooperative Vector
-280 CoopVector_ScalarBitwiseOp                            Perform Scalar bitwise operation on each element of Cooperative Vector
-281 CoopVector_BitwiseShift                               Shift left each integer vector by given num of bits
-282 CoopVector_Negate                                     Unary Complement
+279 CoopVector_ScalarClamp                                Perform scalar clamp operation on each element of Cooperative Vector
+280 CoopVector_BitwiseOp                                  Perform bitwise operation on each element of Cooperative Vector
+281 CoopVector_ScalarBitwiseOp                            Perform Scalar bitwise operation on each element of Cooperative Vector
+282 CoopVector_BitwiseShift                               Shift left each integer vector by given num of bits
+283 CoopVector_Negate                                     Unary Complement
 === ===================================================== =======================================================================================================================================================================================================================
 
 

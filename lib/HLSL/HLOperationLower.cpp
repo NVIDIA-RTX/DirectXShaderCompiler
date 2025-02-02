@@ -6674,6 +6674,26 @@ Value *TranslateCoopVectorClamp(CallInst *CI, IntrinsicOp IOP,
                             {opArg, thisPtr, FloorVecPtr, CeilVecPtr});
 }
 
+Value *TranslateCoopVectorScalarClamp(CallInst *CI, IntrinsicOp IOP,
+                                      OP::OpCode opcode,
+                                      HLOperationLowerHelper &helper,
+                                      HLObjectOperationLowerHelper *pObjHelper,
+                                      bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *FloorVecVal =
+      CI->getArgOperand(HLOperandIndex::kCoopVecClampFloorValOpIdx);
+  Value *CeilVecVal =
+      CI->getArgOperand(HLOperandIndex::kCoopVecClampCeilValOpIdx);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, FloorVecVal->getType());
+
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, thisPtr, FloorVecVal, CeilVecVal});
+}
+
 Value *TranslateCoopVectorActivation(CallInst *CI, IntrinsicOp IOP,
                                      OP::OpCode opcode,
                                      HLOperationLowerHelper &helper,
@@ -7509,6 +7529,8 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::CoopVector_ScalarMin},
     {IntrinsicOp::MOP_ScalarMax, TranslateCoopVectorScalarMax,
      DXIL::OpCode::CoopVector_ScalarMax},
+    {IntrinsicOp::MOP_ScalarClamp, TranslateCoopVectorScalarClamp,
+     DXIL::OpCode::CoopVector_ScalarClamp},
     {IntrinsicOp::MOP_SumAccumulate, TranslateWaveMatrix_Accumulate,
      DXIL::OpCode::WaveMatrix_SumAccumulate},
     {IntrinsicOp::MOP_Add, TranslateArithmeticOp, 

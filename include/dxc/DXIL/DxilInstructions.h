@@ -7659,7 +7659,7 @@ struct DxilInst_WaveMatrix_MultiplyAccumulate {
   void set_waveMatrixRight(llvm::Value *val) { Instr->setOperand(3, val); }
 };
 
-/// This instruction Perform scalar operation on each element of wave matrix
+/// This instruction Perform clamp operation on each element of wave matrix
 struct DxilInst_WaveMatrix_ScalarOp {
   llvm::Instruction *Instr;
   // Construction and identification
@@ -9047,6 +9047,37 @@ struct DxilInst_CoopVector_Clamp {
   void set_coopvectorPtrFlr(llvm::Value *val) { Instr->setOperand(2, val); }
   llvm::Value *get_coopvectorPtrCeil() const { return Instr->getOperand(3); }
   void set_coopvectorPtrCeil(llvm::Value *val) { Instr->setOperand(3, val); }
+};
+
+/// This instruction Perform scalar clamp operation on each element of Cooperative Vector
+struct DxilInst_CoopVector_ScalarClamp {
+  llvm::Instruction *Instr;
+  // Construction and identification
+  DxilInst_CoopVector_ScalarClamp(llvm::Instruction *pInstr) : Instr(pInstr) {}
+  operator bool() const {
+    return hlsl::OP::IsDxilOpFuncCallInst(Instr, hlsl::OP::OpCode::CoopVector_ScalarClamp);
+  }
+  // Validation support
+  bool isAllowed() const { return true; }
+  bool isArgumentListValid() const {
+    if (4 != llvm::dyn_cast<llvm::CallInst>(Instr)->getNumArgOperands()) return false;
+    return true;
+  }
+  // Metadata
+  bool requiresUniformInputs() const { return false; }
+  // Operand indexes
+  enum OperandIdx {
+    arg_coopvectorPtr = 1,
+    arg_coopvectorValFlr = 2,
+    arg_coopvectorValCeil = 3,
+  };
+  // Accessors
+  llvm::Value *get_coopvectorPtr() const { return Instr->getOperand(1); }
+  void set_coopvectorPtr(llvm::Value *val) { Instr->setOperand(1, val); }
+  llvm::Value *get_coopvectorValFlr() const { return Instr->getOperand(2); }
+  void set_coopvectorValFlr(llvm::Value *val) { Instr->setOperand(2, val); }
+  llvm::Value *get_coopvectorValCeil() const { return Instr->getOperand(3); }
+  void set_coopvectorValCeil(llvm::Value *val) { Instr->setOperand(3, val); }
 };
 
 /// This instruction Perform bitwise operation on each element of Cooperative Vector

@@ -352,6 +352,7 @@ enum class IntrinsicOp {
   MOP_ScalarMod,
   MOP_ScalarMin,
   MOP_ScalarMax,
+  MOP_ScalarClamp,
   MOP_SumAccumulate,
   MOP_Add,
   MOP_Multiply,

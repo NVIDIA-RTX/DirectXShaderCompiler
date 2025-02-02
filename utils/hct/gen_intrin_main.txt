@@ -1284,6 +1284,7 @@ namespace CoopVecMethods {
 	void [[amo]] ScalarMin(in $match<1, -1> numeric value);
 	void [[amo]] ScalarMax(in $match<1, -1> numeric value);
 	void [[amo]] Clamp(in CoopVec floorVec, in CoopVec ceilVec);
+	void [[amo]] ScalarClamp(in $match<1, -1> numeric floorval, in $match<1, -1> numeric ceilVal);
 	void [[amo]] Activation(in uint op);
 	void [[amo]] BitwiseAND(in CoopVec CoopVecA);
 	void [[amo]] BitwiseOR(in CoopVec CoopVecA);

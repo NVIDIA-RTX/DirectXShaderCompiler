@@ -474,7 +474,8 @@ inline bool IsFeedbackTexture(DXIL::ResourceKind ResourceKind) {
 enum class OpCode : unsigned {
   // 
   CoopVector_ArithmeticOp = 262, // Elementwise Arithmetic Op
-  CoopVector_ScalarBitwiseOp = 280, // Perform Scalar bitwise operation on each element of Cooperative Vector
+  CoopVector_ScalarBitwiseOp = 281, // Perform Scalar bitwise operation on each element of Cooperative Vector
+  CoopVector_ScalarClamp = 279, // Perform scalar clamp operation on each element of Cooperative Vector
 
   // Amplification shader instructions
   DispatchMesh = 173, // Amplification shader intrinsic DispatchMesh
@@ -527,8 +528,8 @@ enum class OpCode : unsigned {
   // CoopVector
   CoopVector_Activation = 277, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_Annotate = 259, // Annotate a wave matrix pointer with the type information
-  CoopVector_BitwiseOp = 279, // Perform bitwise operation on each element of Cooperative Vector
-  CoopVector_BitwiseShift = 281, // Shift left each integer vector by given num of bits 
+  CoopVector_BitwiseOp = 280, // Perform bitwise operation on each element of Cooperative Vector
+  CoopVector_BitwiseShift = 282, // Shift left each integer vector by given num of bits 
   CoopVector_Clamp = 278, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_CopyFrom = 269, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_Fill = 260, // Fill coopvector with scalar value
@@ -539,7 +540,7 @@ enum class OpCode : unsigned {
   CoopVector_MatMulAdd = 268, // Vector Matrix Multiply
   CoopVector_Max = 274, // Perform componentwise max between Coop Vectors
   CoopVector_Min = 273, // Perform componentwise min between Coop Vectors
-  CoopVector_Negate = 282, // Unary Complement
+  CoopVector_Negate = 283, // Unary Complement
   CoopVector_ReadFromIndex = 275, // Read a Coop Vector Element at Index
   CoopVector_ScalarMax = 272, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_ScalarMin = 271, // Perform scalar operation on each element of Cooperative Vector
@@ -870,7 +871,7 @@ enum class OpCode : unsigned {
   WaveMatrix_LoadRawBuf = 229, // Load wave matrix from raw buffer
   WaveMatrix_Multiply = 233, // Mutiply left and right wave matrix and store in accumulator
   WaveMatrix_MultiplyAccumulate = 234, // Mutiply left and right wave matrix and accumulate into accumulator
-  WaveMatrix_ScalarOp = 235, // Perform scalar operation on each element of wave matrix
+  WaveMatrix_ScalarOp = 235, // Perform clamp operation on each element of wave matrix
   WaveMatrix_StoreGroupShared = 232, // Store wave matrix to group shared array
   WaveMatrix_StoreRawBuf = 231, // Store wave matrix to raw buffer
   WaveMatrix_SumAccumulate = 236, // Sum rows or columns of an input matrix into an existing accumulator fragment matrix
@@ -891,9 +892,9 @@ enum class OpCode : unsigned {
   NumOpCodes_Dxil_1_5 = 216,
   NumOpCodes_Dxil_1_6 = 222,
   NumOpCodes_Dxil_1_7 = 226,
-  NumOpCodes_Dxil_1_8 = 283,
+  NumOpCodes_Dxil_1_8 = 284,
 
-  NumOpCodes = 283 // exclusive last value of enumeration
+  NumOpCodes = 284 // exclusive last value of enumeration
 };
 // OPCODE-ENUM:END
 
@@ -907,6 +908,7 @@ enum class OpCodeClass : unsigned {
   // 
   CoopVector_ArithmeticOp,
   CoopVector_ScalarBitwiseOp,
+  CoopVector_ScalarClamp,
 
   // Amplification shader instructions
   DispatchMesh,
@@ -1236,9 +1238,9 @@ enum class OpCodeClass : unsigned {
   NumOpClasses_Dxil_1_5 = 143,
   NumOpClasses_Dxil_1_6 = 149,
   NumOpClasses_Dxil_1_7 = 153,
-  NumOpClasses_Dxil_1_8 = 208,
+  NumOpClasses_Dxil_1_8 = 209,
 
-  NumOpClasses = 208 // exclusive last value of enumeration
+  NumOpClasses = 209 // exclusive last value of enumeration
 };
 // OPCODECLASS-ENUM:END
 

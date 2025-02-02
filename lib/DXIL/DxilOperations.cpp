@@ -492,6 +492,11 @@ const OP::OpCodeProperty OP::m_OpCodeProps[(unsigned)OP::OpCode::NumOpCodes] = {
   {  OC::CoopVector_WriteToIndex, "CoopVector_WriteToIndex",  OCC::CoopVector_WriteToIndex,  "coopVector_WriteToIndex",   { false,  true,  true,  true, false,  true,  true,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_Activation,   "CoopVector_Activation",    OCC::CoopVector_Activation,    "coopVector_Activation",     { false,  true,  true,  true, false,  true,  true,  true, false, false, false}, Attribute::ArgMemOnly, },
   {  OC::CoopVector_Clamp,        "CoopVector_Clamp",         OCC::CoopVector_Clamp,         "coopVector_Clamp",          {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::None,     },
+
+  //                                                                                                                         void,     h,     f,     d,    i1,    i8,   i16,   i32,   i64,   udt,   obj ,  function attribute
+  {  OC::CoopVector_ScalarClamp,  "CoopVector_ScalarClamp",   OCC::CoopVector_ScalarClamp,   "coopVector_ScalarClamp",    { false,  true,  true,  true, false,  true,  true,  true, false, false, false}, Attribute::None,     },
+
+  // CoopVector                                                                                                              void,     h,     f,     d,    i1,    i8,   i16,   i32,   i64,   udt,   obj ,  function attribute
   {  OC::CoopVector_BitwiseOp,    "CoopVector_BitwiseOp",     OCC::CoopVector_BitwiseOp,     "coopVector_BitwiseOp",      {  true, false, false, false, false, false, false, false, false, false, false}, Attribute::ArgMemOnly, },
 
   //                                                                                                                         void,     h,     f,     d,    i1,    i8,   i16,   i32,   i64,   udt,   obj ,  function attribute
@@ -1154,9 +1159,9 @@ void OP::GetMinShaderModelAndMask(OpCode C, bool bWithTranslation,
   // CoopVector_ScalarMulAdd=270, CoopVector_ScalarMin=271,
   // CoopVector_ScalarMax=272, CoopVector_Min=273, CoopVector_Max=274,
   // CoopVector_ReadFromIndex=275, CoopVector_WriteToIndex=276,
-  // CoopVector_Activation=277, CoopVector_Clamp=278, CoopVector_BitwiseOp=279,
-  // CoopVector_BitwiseShift=281, CoopVector_Negate=282
-  if (op == 245 || op == 254 || (258 <= op && op <= 261) || (263 <= op && op <= 279) || (281 <= op && op <= 282)) {
+  // CoopVector_Activation=277, CoopVector_Clamp=278, CoopVector_BitwiseOp=280,
+  // CoopVector_BitwiseShift=282, CoopVector_Negate=283
+  if (op == 245 || op == 254 || (258 <= op && op <= 261) || (263 <= op && op <= 278) || op == 280 || (282 <= op && op <= 283)) {
     major = 6;  minor = 8;
     return;
   }
@@ -1940,6 +1945,11 @@ Function *OP::GetOpFunc(OpCode opCode, Type *pOverloadType) {
                       case OpCode::CoopVector_WriteToIndex:A(pV);       A(pI32); A(pCoopVector);A(pI32); A(pETy); break;
                       case OpCode::CoopVector_Activation:  A(pV);       A(pI32); A(pCoopVector);A(pETy); break;
                       case OpCode::CoopVector_Clamp:       A(pV);       A(pI32); A(pCoopVector);A(pCoopVector);A(pCoopVector);break;
+                    
+                        // 
+                      case OpCode::CoopVector_ScalarClamp: A(pV);       A(pI32); A(pCoopVector);A(pETy); A(pETy); break;
+                    
+                        // CoopVector
                       case OpCode::CoopVector_BitwiseOp:   A(pV);       A(pI32); A(pCoopVector);A(pI8);  A(pCoopVector);break;
                     
                         // 
@@ -2091,6 +2101,7 @@ llvm::Type *OP::GetOverloadType(OpCode opCode, llvm::Function *F) {
   case OpCode::CoopVector_ScalarMin:
   case OpCode::CoopVector_ScalarMax:
   case OpCode::CoopVector_Activation:
+  case OpCode::CoopVector_ScalarClamp:
     if (FT->getNumParams() <= 2) return nullptr;
     return FT->getParamType(2);
   case OpCode::MinPrecXRegStore:

@@ -5210,7 +5210,7 @@ class db_dxil(object):
             "WaveMatrix_ScalarOp",
             next_op_idx,
             "WaveMatrix_ScalarOp",
-            "Perform scalar operation on each element of wave matrix",
+            "Perform clamp operation on each element of wave matrix",
             "hfi",
             "amo",
             [
@@ -6071,6 +6071,22 @@ class db_dxil(object):
         next_op_idx += 1
 
         self.add_dxil_op(
+            "CoopVector_ScalarClamp",
+            next_op_idx,
+            "CoopVector_ScalarClamp",
+            "Perform scalar clamp operation on each element of Cooperative Vector",
+            "hfd8wi",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "$o", "coopvectorValFlr", "Floor Coop Vector pointer"),
+                db_dxil_param(4, "$o", "coopvectorValCeil", "Ceil Coop Vector pointer"),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_dxil_op(
             "CoopVector_BitwiseOp",
             next_op_idx,
             "CoopVector_BitwiseOp",
@@ -6184,7 +6200,7 @@ class db_dxil(object):
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 283   , (
+        assert next_op_idx == 284   , (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )
