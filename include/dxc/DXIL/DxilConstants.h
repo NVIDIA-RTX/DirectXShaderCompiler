@@ -474,7 +474,7 @@ inline bool IsFeedbackTexture(DXIL::ResourceKind ResourceKind) {
 enum class OpCode : unsigned {
   // 
   CoopVector_ArithmeticOp = 262, // Elementwise Arithmetic Op
-  CoopVector_ScalarBitwiseOp = 276, // Perform Scalar bitwise operation on each element of Cooperative Vector
+  CoopVector_ScalarBitwiseOp = 278, // Perform Scalar bitwise operation on each element of Cooperative Vector
 
   // Amplification shader instructions
   DispatchMesh = 173, // Amplification shader intrinsic DispatchMesh
@@ -525,25 +525,27 @@ enum class OpCode : unsigned {
   ThreadIdInGroup = 95, // reads the thread ID within the group (SV_GroupThreadID)
 
   // CoopVector
-  CoopVector_Activation = 273, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_Activation = 275, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_Annotate = 259, // Annotate a wave matrix pointer with the type information
-  CoopVector_BitwiseOp = 275, // Perform bitwise operation on each element of Cooperative Vector
-  CoopVector_BitwiseShift = 277, // Shift left each integer vector by given num of bits 
-  CoopVector_Clamp = 274, // Perform scalar operation on each element of Cooperative Vector
-  CoopVector_CopyFrom = 267, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_BitwiseOp = 277, // Perform bitwise operation on each element of Cooperative Vector
+  CoopVector_BitwiseShift = 279, // Shift left each integer vector by given num of bits 
+  CoopVector_Clamp = 276, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_CopyFrom = 269, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_Fill = 260, // Fill coopvector with scalar value
   CoopVector_Index = 258, // Returns the element in an Coop Vector at specified index
+  CoopVector_LoadGroupShared = 264, // Load wave matrix from group shared array
   CoopVector_LoadRawBuf = 263, // Load coop vector from raw buffer
-  CoopVector_MatMul = 265, // Vector Matrix Multiply
-  CoopVector_MatMulAdd = 266, // Vector Matrix Multiply
-  CoopVector_Max = 270, // Perform scalar operation on each element of Cooperative Vector
-  CoopVector_Min = 269, // Perform scalar operation on each element of Cooperative Vector
-  CoopVector_Negate = 278, // Unary Complement
-  CoopVector_ReadFromIndex = 271, // Read a Coop Vector Element at Index
-  CoopVector_ScalarMulAdd = 268, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_MatMul = 267, // Vector Matrix Multiply
+  CoopVector_MatMulAdd = 268, // Vector Matrix Multiply
+  CoopVector_Max = 272, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_Min = 271, // Perform scalar operation on each element of Cooperative Vector
+  CoopVector_Negate = 280, // Unary Complement
+  CoopVector_ReadFromIndex = 273, // Read a Coop Vector Element at Index
+  CoopVector_ScalarMulAdd = 270, // Perform scalar operation on each element of Cooperative Vector
   CoopVector_ScalarOp = 261, // Perform scalar operation on each element of Cooperative Vector
-  CoopVector_StoreRawBuf = 264, // Store wave matrix to raw buffer
-  CoopVector_WriteToIndex = 272, // Write a Coop Vector Element at Index
+  CoopVector_StoreGroupShared = 266, // Store coopVector to group shared array
+  CoopVector_StoreRawBuf = 265, // Store wave matrix to raw buffer
+  CoopVector_WriteToIndex = 274, // Write a Coop Vector Element at Index
 
   // Create/Annotate Node Handles
   AllocateNodeOutputRecords = 238, // returns a handle for the output records
@@ -887,9 +889,9 @@ enum class OpCode : unsigned {
   NumOpCodes_Dxil_1_5 = 216,
   NumOpCodes_Dxil_1_6 = 222,
   NumOpCodes_Dxil_1_7 = 226,
-  NumOpCodes_Dxil_1_8 = 279,
+  NumOpCodes_Dxil_1_8 = 281,
 
-  NumOpCodes = 279 // exclusive last value of enumeration
+  NumOpCodes = 281 // exclusive last value of enumeration
 };
 // OPCODE-ENUM:END
 
@@ -947,6 +949,7 @@ enum class OpCodeClass : unsigned {
   CoopVector_CopyFrom,
   CoopVector_Fill,
   CoopVector_Index,
+  CoopVector_LoadGroupShared,
   CoopVector_LoadRawBuf,
   CoopVector_MatMul,
   CoopVector_MatMulAdd,
@@ -956,6 +959,7 @@ enum class OpCodeClass : unsigned {
   CoopVector_ReadFromIndex,
   CoopVector_ScalarMulAdd,
   CoopVector_ScalarOp,
+  CoopVector_StoreGroupShared,
   CoopVector_StoreRawBuf,
   CoopVector_WriteToIndex,
 
@@ -1228,9 +1232,9 @@ enum class OpCodeClass : unsigned {
   NumOpClasses_Dxil_1_5 = 143,
   NumOpClasses_Dxil_1_6 = 149,
   NumOpClasses_Dxil_1_7 = 153,
-  NumOpClasses_Dxil_1_8 = 204,
+  NumOpClasses_Dxil_1_8 = 206,
 
-  NumOpClasses = 204 // exclusive last value of enumeration
+  NumOpClasses = 206 // exclusive last value of enumeration
 };
 // OPCODECLASS-ENUM:END
 

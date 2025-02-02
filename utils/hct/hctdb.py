@@ -726,7 +726,7 @@ class db_dxil(object):
         for i in "CoopVector_BitwiseOp,CoopVector_BitwiseShift,CoopVector_Negate".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
-        for i in "CoopVector_ReadFromIndex,CoopVector_WriteToIndex".split(","):
+        for i in "CoopVector_ReadFromIndex,CoopVector_WriteToIndex,CoopVector_LoadGroupShared,CoopVector_StoreGroupShared".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
 
@@ -5816,6 +5816,24 @@ class db_dxil(object):
         next_op_idx += 1
 
         self.add_dxil_op(
+            "CoopVector_LoadGroupShared",
+            next_op_idx,
+            "CoopVector_LoadGroupShared",
+            "Load wave matrix from group shared array",
+            "hfd8wi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopVectorPtr", "Coop Vector pointer"),
+                db_dxil_param(
+                    3, "$gsptr", "groupsharedPtr", "pointer to groupshared array"
+                ),
+                db_dxil_param(4, "i32", "startArrayIndex", "start array index"),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_dxil_op(
             "CoopVector_StoreRawBuf",
             next_op_idx,
             "CoopVector_StoreRawBuf",
@@ -5833,6 +5851,25 @@ class db_dxil(object):
             ],
         )
         next_op_idx += 1
+
+        self.add_dxil_op(
+            "CoopVector_StoreGroupShared",
+            next_op_idx,
+            "CoopVector_StoreGroupShared",
+            "Store coopVector to group shared array",
+            "hfd8wi",
+            "amo",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopVectorPtr", "CoopVec pointer"),
+                db_dxil_param(
+                    3, "$gsptr", "groupsharedPtr", "pointer to groupshared array"
+                ),
+                db_dxil_param(4, "i32", "startArrayIndex", "start array index"),
+            ],
+        )
+        next_op_idx += 1
+
         self.add_dxil_op(
             "CoopVector_MatMul",
             next_op_idx,
@@ -5841,17 +5878,19 @@ class db_dxil(object):
             "v",
             "",
             [
-                db_dxil_param(0, "v", "", ""),
-                db_dxil_param(2, "coopvector", "coopVectorPtr", "CoopVector pointer"),
-                db_dxil_param(3, "i32", "inputInterpretation", "Input Interpretation"),
-                db_dxil_param(4, "res", "rawBuf", "Matrix for Multiply"),
-                db_dxil_param(5, "i32", "matrixOffsetInBytes", "offset in bytes"),
-                db_dxil_param(6, "i32", "matrixIntepretation", "Matrix Intepretation"),
-                db_dxil_param(7, "i32", "M", "Dimension M"),
-                db_dxil_param(8, "i32", "K", "Dimension K"),
-                db_dxil_param(9, "i32", "Layout", "Matrix Layout"),
-                db_dxil_param(10, "i1", "Transpose", "Is Transposed"),
-                db_dxil_param(11, "i32", "matrixStride", "Matrix Stride"),
+                db_dxil_param(0, "v", "", ""),    
+                db_dxil_param(2, "coopvector", "coopVectorPtr_result", "Result CoopVector Pointer"),
+                db_dxil_param(3, "coopvector", "coopVectorPtr_input", "CoopVector pointer"),
+                db_dxil_param(4, "i32", "inputInterpretation", "Input Interpretation"),
+                db_dxil_param(5, "res", "rawBuf", "Matrix for Multiply"),
+                db_dxil_param(6, "i32", "matrixOffsetInBytes", "offset in bytes"),
+                db_dxil_param(7, "i32", "matrixIntepretation", "Matrix Intepretation"),
+                db_dxil_param(8, "i32", "M", "Dimension M"),
+                db_dxil_param(9, "i32", "K", "Dimension K"),
+                db_dxil_param(10, "i32", "Layout", "Matrix Layout"),
+                db_dxil_param(11, "i1", "Transpose", "Is Transposed"),
+                db_dxil_param(12, "i32", "matrixStride", "Matrix Stride"),
+
             ],
         )
         next_op_idx += 1
@@ -5864,20 +5903,22 @@ class db_dxil(object):
             "v",
             "",
             [
-                db_dxil_param(0, "v", "", ""),
-                db_dxil_param(2, "coopvector", "coopVectorPtr", "CoopVector pointer"),
-                db_dxil_param(3, "i32", "inputInterpretation", "Input Interpretation"),
-                db_dxil_param(4, "res", "matrix", "Matrix for Multiply"),
-                db_dxil_param(5, "i32", "matrixOffsetInBytes", "offset in bytes"),
-                db_dxil_param(6, "i32", "matrixIntepretation", "Matrix Intepretation"),
-                db_dxil_param(7, "res", "bias", "Bias for Add"),
-                db_dxil_param(8, "i32", "biasOffsetInBytes", "offset in bytes"),
-                db_dxil_param(9, "i32", "biasIntepretation", "Bias Intepretation"),
-                db_dxil_param(10, "i32", "M", "Dimension M"),
-                db_dxil_param(11, "i32", "K", "Dimension K"),
-                db_dxil_param(12, "i32", "Layout", "Matrix Layout"),
-                db_dxil_param(13, "i1", "Transpose", "Is Transposed"),
-                db_dxil_param(14, "i32", "matrixStride", "Matrix Stride"),
+                db_dxil_param(0, "v", "", ""),    
+                db_dxil_param(2, "coopvector", "coopVectorPtr_result", "CoopVector pointer"),
+                db_dxil_param(3, "coopvector", "coopVectorPtr_input", "CoopVector pointer"),
+                db_dxil_param(4, "i32", "inputInterpretation", "Input Interpretation"),
+                db_dxil_param(5, "res", "matrix", "Matrix for Multiply"),
+                db_dxil_param(6, "i32", "matrixOffsetInBytes", "offset in bytes"),
+                db_dxil_param(7, "i32", "matrixIntepretation", "Matrix Intepretation"),
+                db_dxil_param(8, "res", "bias", "Bias for Add"),
+                db_dxil_param(9, "i32", "biasOffsetInBytes", "offset in bytes"),
+                db_dxil_param(10, "i32", "biasIntepretation", "Bias Intepretation"),
+                db_dxil_param(11, "i32", "M", "Dimension M"),
+                db_dxil_param(12, "i32", "K", "Dimension K"),
+                db_dxil_param(13, "i32", "Layout", "Matrix Layout"),
+                db_dxil_param(14, "i1", "Transpose", "Is Transposed"),
+                db_dxil_param(15, "i32", "matrixStride", "Matrix Stride"),
+
             ],
         )
         next_op_idx += 1
@@ -6072,7 +6113,7 @@ class db_dxil(object):
             next_op_idx,
             "CoopVector_BitwiseShift",
             "Shift left each integer vector by given num of bits ",
-            "di",
+            "8wil",
             "amo",
             [
                 db_dxil_param(0, "v", "", ""),
@@ -6114,7 +6155,7 @@ class db_dxil(object):
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 279, (
+        assert next_op_idx == 281   , (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )

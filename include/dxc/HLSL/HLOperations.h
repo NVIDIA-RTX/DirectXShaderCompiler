@@ -451,6 +451,10 @@ const unsigned kCoopVecIndexValOpIdx = 3;
 const unsigned kCoopVecBitwiseShiftValIdx = 2;
 const unsigned kCoopVecArithmeticOpOperandIdx = 2;
 
+// CoopVector MatMult Function Arg indices
+const unsigned kCoopVecMatMulIpVecPtridx = 2;
+
+
 // AnnotateWaveMatrix.
 const unsigned kAnnotateCoopVectorPtrOpIdx = 1;
 const unsigned kAnnotateCoopVectorPropertiesOpIdx = 2;

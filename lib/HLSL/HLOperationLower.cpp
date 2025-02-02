@@ -6359,15 +6359,31 @@ Value *TranslateCoopVecLoadStore(CallInst *CI, IntrinsicOp IOP,
   Type *bufETy = buf->getType();
   bool bRawBuf = bufETy == hlslOP->GetHandleType();
 
+  if(!bRawBuf) {
+    Constant *C = dyn_cast<Constant>(buf);
+    if (auto *CE = dyn_cast<ConstantExpr>(C))
+      C = CE->getOperand(0)->stripPointerCasts();
+    DXASSERT(
+        C && C->getType()->getPointerAddressSpace() == DXIL::kTGSMAddrSpace,
+        "otherwise, non-groupshared type passed to groupshared Load/Store");
+    bufETy = dxilutil::StripArrayTypes(C->getType()->getPointerElementType());
+    buf = ConstantExpr::getPointerBitCastOrAddrSpaceCast(
+        C, bufETy->getPointerTo(DXIL::kTGSMAddrSpace));
+  }
+
   if (IOP == IntrinsicOp::MOP_Load) {
-    opcode = OP::OpCode::CoopVector_LoadRawBuf;
+    opcode = bRawBuf ? OP::OpCode::CoopVector_LoadRawBuf
+                     : OP::OpCode::CoopVector_LoadGroupShared;
   } else if (IOP == IntrinsicOp::MOP_Store) {
-    opcode = OP::OpCode::CoopVector_StoreRawBuf;
+    opcode = bRawBuf ? OP::OpCode::CoopVector_StoreRawBuf
+                     : OP::OpCode::CoopVector_StoreGroupShared;
+
   } else {
     DXASSERT(0, "otherwise, unexpected IntrinsicOp");
   }
 
-  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Function *dxilFunc =
+      hlslOP->GetOpFunc(opcode, bRawBuf ? helper.voidTy : bufETy);
 
   IRBuilder<> Builder(CI);
   SmallVector<Value *, 7> args;
@@ -6402,12 +6418,14 @@ Value *TranslateCoopVectorMatrixMultiply(
   IRBuilder<> Builder(CI);
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *ipVector =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulIpVecPtridx);
   Value *zeroVal = hlslOP->GetU32Const(0);
   Value *falseVal = hlslOP->GetI1Const(0);
   Value *buf = CI->getArgOperand(4);
-  return Builder.CreateCall(dxilFunc,
-                            {opArg, thisPtr, zeroVal, buf, zeroVal, zeroVal,
-                             zeroVal, zeroVal, zeroVal, falseVal, zeroVal});
+  return Builder.CreateCall(dxilFunc, 
+                            {opArg, thisPtr, ipVector, zeroVal, buf, zeroVal,
+                             zeroVal, zeroVal, zeroVal, zeroVal, falseVal, zeroVal});
 }
 Value *TranslateCoopVectorMatrixMultiplyAdd(
     CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
@@ -6420,12 +6438,15 @@ Value *TranslateCoopVectorMatrixMultiplyAdd(
   IRBuilder<> Builder(CI);
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+  Value *ipVector =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulIpVecPtridx);
   Value *zeroVal = hlslOP->GetU32Const(0);
   Value *buf = CI->getArgOperand(4);
   Value *falseVal = hlslOP->GetI1Const(0);
-  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, zeroVal, buf, zeroVal,
-                                       zeroVal, buf, zeroVal, zeroVal, zeroVal,
-                                       zeroVal, zeroVal, falseVal, zeroVal});
+  return Builder.CreateCall(dxilFunc,
+                            {opArg, thisPtr, ipVector, zeroVal, buf, zeroVal,
+                             zeroVal, buf, zeroVal, zeroVal, zeroVal, zeroVal,
+                             zeroVal, falseVal, zeroVal});
 }
 
 Value *TranslateCoopVectorCopyFrom(CallInst *CI, IntrinsicOp IOP,
