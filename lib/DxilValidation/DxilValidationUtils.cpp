@@ -52,6 +52,8 @@ ValidationContext::ValidationContext(Module &llvmModule, Module *DebugModule,
       slotTracker(&llvmModule, true) {
   DxilMod.GetDxilVersion(m_DxilMajor, m_DxilMinor);
   HandleTy = DxilMod.GetOP()->GetHandleType();
+  WaveMatrixTy = DxilMod.GetOP()->GetWaveMatPtrType()->getPointerElementType();
+  CoopVectorTy = DxilMod.GetOP()->GetCoopVecPtrType()->getPointerElementType();
 
   for (Function &F : llvmModule.functions()) {
     if (DxilMod.HasDxilEntryProps(&F)) {

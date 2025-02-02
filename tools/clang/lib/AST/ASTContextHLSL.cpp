@@ -1180,7 +1180,7 @@ clang::CXXRecordDecl *hlsl::DeclareWaveMatrixType(clang::ASTContext &context,
 }
 
 clang::CXXRecordDecl *hlsl::DeclareCoopVectorType(clang::ASTContext &context) {
-  StringRef Name = "OpaqueVector";
+  StringRef Name = "CoopVector";
   BuiltinTypeDeclBuilder typeDeclBuilder(context.getTranslationUnitDecl(),
                                          Name);
   TemplateTypeParmDecl *TyParamDecl =

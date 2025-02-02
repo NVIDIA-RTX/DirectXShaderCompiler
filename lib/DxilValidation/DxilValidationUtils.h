@@ -70,6 +70,7 @@ struct ValidationContext {
   DxilModule &DxilMod;
   const Type *HandleTy;
   const Type *WaveMatrixTy;
+  const Type *CoopVectorTy;
   const DataLayout &DL;
   DebugLoc LastDebugLocEmit;
   ValidationRule LastRuleEmit;

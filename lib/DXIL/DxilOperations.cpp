@@ -1374,12 +1374,12 @@ OP::OP(LLVMContext &Ctx, Module *pModule)
                        0);
   m_pCoopVectorType =
       PointerType::get(GetOrCreateStructType(m_Ctx, Type::getInt8PtrTy(m_Ctx),
-                                             "dx.types.CoopVector", pModule),
+                                             "dx.types.coopVector", pModule),
                        0);
 
   m_pCoopVectorPropsType = cast<StructType>(GetOrCreateStructType(
       m_Ctx, {Type::getInt8Ty(m_Ctx), Type::getInt32Ty(m_Ctx)},
-      "dx.types.CoopVectorProps", pModule));
+      "dx.types.coopVectorProps", pModule));
 }
 
 void OP::RefreshCache() {

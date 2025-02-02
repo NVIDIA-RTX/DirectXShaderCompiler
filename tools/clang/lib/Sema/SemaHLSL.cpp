@@ -1389,7 +1389,7 @@ const ArBasicKind *g_LegalIntrinsicCompTypes[] = {
     g_AnyOutputRecordCT,         // LICOMPTYPE_ANY_NODE_OUTPUT_RECORD
     g_GroupNodeOutputRecordsCT,  // LICOMPTYPE_GROUP_NODE_OUTPUT_RECORDS
     g_ThreadNodeOutputRecordsCT, // LICOMPTYPE_THREAD_NODE_OUTPUT_RECORDS
-    g_CoopVectorCT,              // LICOMPTYPE_OPAQUE_VECTOR
+    g_CoopVectorCT,              // LICOMPTYPE_COOP_VECTOR
 };
 static_assert(
     ARRAYSIZE(g_LegalIntrinsicCompTypes) == LICOMPTYPE_COUNT,

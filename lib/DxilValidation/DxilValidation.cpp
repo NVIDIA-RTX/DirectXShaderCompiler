@@ -2124,7 +2124,7 @@ static bool ValidateType(Type *Ty, ValidationContext &ValCtx,
     StringRef Name = ST->getName();
     if (Name.startswith("dx.")) {
       // Allow handle type.
-      if (ValCtx.HandleTy == Ty || ValCtx.WaveMatrixTy == Ty)
+      if (ValCtx.HandleTy == Ty || ValCtx.WaveMatrixTy == Ty || ValCtx.CoopVectorTy == Ty)
         return true;
       hlsl::OP *hlslOP = ValCtx.DxilMod.GetOP();
       if (IsDxilBuiltinStructType(ST, hlslOP)) {
