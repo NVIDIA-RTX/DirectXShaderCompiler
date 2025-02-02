@@ -49,6 +49,7 @@ static StringRef HLOpcodeGroupNames[]{
     "wavematrix_annotate",         // HLWaveMatrix_Annotate,
     "annotatenodehandle",          // HLAnnotateNodeHandle
     "annotatenoderecordhandle",    // HLAnnotateNodeRecordHandle
+    "coopvector_annotate",         // HLCoopVector_Annotate
     "numOfHLDXIL",                 // NumOfHLOps
 };
 static_assert(_countof(HLOpcodeGroupNames) ==
@@ -74,6 +75,7 @@ static StringRef HLOpcodeGroupFullNames[]{
     "dx.hl.wavematrix_annotate",         // HLWaveMatrix_Annotate,
     "dx.hl.annotatenodehandle",          // HLAnnotateNodeHandle,
     "dx.hl.annotatenoderecordhandle",    // HLAnnotateNodeRecordHandle
+    "dx.hl.coopvector_annotate",         // HLCoopVector_Annotate
     "numOfHLDXIL",                       // NumOfHLOps
 };
 static_assert(_countof(HLOpcodeGroupFullNames) ==
@@ -100,6 +102,7 @@ static HLOpcodeGroup GetHLOpcodeGroupInternal(StringRef group) {
       .Case("annotatenodehandle", HLOpcodeGroup::HLAnnotateNodeHandle)
       .Case("annotatenoderecordhandle",
             HLOpcodeGroup::HLAnnotateNodeRecordHandle)
+      .Case("coopvector_annotate", HLOpcodeGroup::HLCoopVector_Annotate)
       .Default(HLOpcodeGroup::NotHL);
 }
 
@@ -158,6 +161,7 @@ StringRef GetHLOpcodeGroupName(HLOpcodeGroup op) {
   case HLOpcodeGroup::HLWaveMatrix_Annotate:
   case HLOpcodeGroup::HLAnnotateNodeHandle:
   case HLOpcodeGroup::HLAnnotateNodeRecordHandle:
+  case HLOpcodeGroup::HLCoopVector_Annotate:
     return HLOpcodeGroupNames[static_cast<unsigned>(op)];
   default:
     llvm_unreachable("invalid op");
@@ -183,6 +187,7 @@ StringRef GetHLOpcodeGroupFullName(HLOpcodeGroup op) {
   case HLOpcodeGroup::HLWaveMatrix_Annotate:
   case HLOpcodeGroup::HLAnnotateNodeHandle:
   case HLOpcodeGroup::HLAnnotateNodeRecordHandle:
+  case HLOpcodeGroup::HLCoopVector_Annotate:
     return HLOpcodeGroupFullNames[static_cast<unsigned>(op)];
   default:
     llvm_unreachable("invalid op");

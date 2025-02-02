@@ -44,6 +44,7 @@
 #include "dxc/DXIL/DxilCBuffer.h"
 #include "dxc/DXIL/DxilResourceProperties.h"
 #include "dxc/DXIL/DxilWaveMatrix.h"
+#include "dxc/DXIL/DxilCoopVector.h"
 #include "dxc/DxilRootSignature/DxilRootSignature.h"
 #include "dxc/HLSL/DxilExportMap.h"
 #include "dxc/HLSL/DxilGenerationPass.h" // support pause/resume passes
@@ -215,6 +216,7 @@ private:
                              unsigned &arrayEltSize);
   DxilResourceProperties BuildResourceProperty(QualType resTy);
   DxilWaveMatrixProperties BuildWaveMatrixProperties(QualType resTy);
+  DxilCoopVectorProperties BuildCoopVectorProperties(QualType resTy);
   void ConstructFieldAttributedAnnotation(DxilFieldAnnotation &fieldAnnotation,
                                           QualType fieldTy,
                                           bool bDefaultRowMajor);
@@ -786,9 +788,32 @@ CGMSHLSLRuntime::BuildWaveMatrixProperties(QualType qualTy) {
   return props;
 }
 
+DxilCoopVectorProperties
+CGMSHLSLRuntime::BuildCoopVectorProperties(QualType qualTy) {
+  DxilCoopVectorProperties props;
+  llvm::Type *Ty = CGM.getTypes().ConvertType(qualTy);
+  if (dxilutil::IsHLSLCoopVectorType(Ty)) {
+    props.isCoopVec = true;
+    const CXXRecordDecl *CXXRD =
+        qualTy.getCanonicalType()->getAsCXXRecordDecl();
+    if (const ClassTemplateSpecializationDecl *templateSpecializationDecl =
+            dyn_cast<ClassTemplateSpecializationDecl>(CXXRD)) {
+      const clang::TemplateArgumentList &args =
+          templateSpecializationDecl->getTemplateInstantiationArgs();
+      DXASSERT(args[0].getAsType()->isBuiltinType(),
+               "otherwise, wrong kind of component type");
+      const BuiltinType *BTy = args[0].getAsType()->getAs<BuiltinType>();
+      props.compType = BuiltinTyToCompTy(BTy, false, false);
+      props.length = (unsigned)args[1].getAsIntegral().getExtValue();
+    }
+  }
+  return props;
+}
+
 bool CGMSHLSLRuntime::AddValToPropertyMap(Value *V, QualType Ty) {
   return objectProperties.AddResource(V, BuildResourceProperty(Ty)) ||
-         objectProperties.AddWaveMatrix(V, BuildWaveMatrixProperties(Ty));
+         objectProperties.AddWaveMatrix(V, BuildWaveMatrixProperties(Ty)) ||
+         objectProperties.AddCoopVector(V, BuildCoopVectorProperties(Ty));
 }
 
 void CGMSHLSLRuntime::ConstructFieldAttributedAnnotation(

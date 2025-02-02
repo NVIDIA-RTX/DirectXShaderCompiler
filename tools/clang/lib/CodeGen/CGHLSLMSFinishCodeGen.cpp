@@ -38,6 +38,7 @@
 #include "dxc/DXIL/DxilTypeSystem.h"
 #include "dxc/DXIL/DxilUtil.h"
 #include "dxc/DXIL/DxilWaveMatrix.h"
+#include "dxc/DXIL/DxilCoopVector.h"
 #include "dxc/DxilRootSignature/DxilRootSignature.h"
 #include "dxc/HLSL/DxilExportMap.h"
 #include "dxc/HLSL/DxilGenerationPass.h"
@@ -185,6 +186,18 @@ CallInst *CreateAnnotateWaveMatrix(HLModule &HLM, Value *WaveMatrixPtr,
       Builder, HLOpcodeGroup::HLWaveMatrix_Annotate,
       (unsigned)HLOpcodeGroup::HLWaveMatrix_Annotate, WaveMatrixPtr->getType(),
       {WaveMatrixPtr, WMPConstant}, *HLM.GetModule());
+  return CI;
+}
+
+CallInst *CreateAnnotateCoopVector(HLModule &HLM, Value *CoopVectorPtr,
+                                   DxilCoopVectorProperties &CVP,
+                                   IRBuilder<> &Builder) {
+  Constant *CVPConstant = coopVector_helper::GetAsConstant(
+      CVP, HLM.GetOP()->GetCoopVecPropertiesType());
+  CallInst *CI = HLM.EmitHLOperationCall(
+      Builder, HLOpcodeGroup::HLCoopVector_Annotate,
+      (unsigned)HLOpcodeGroup::HLCoopVector_Annotate, CoopVectorPtr->getType(),
+      {CoopVectorPtr, CVPConstant}, *HLM.GetModule());
   return CI;
 }
 
@@ -775,6 +788,36 @@ void AddAnnotateWaveMatrix(HLModule &HLM,
       CreateAnnotateWaveMatrix(HLM, V, WMP, Builder);
     } else {
       llvm_unreachable("WaveMatrix value is unexpected type");
+    }
+  }
+}
+
+void AddAnnotateCoopVector(HLModule &HLM,
+                           DxilObjectProperties &objectProperties) {
+  for (auto it : objectProperties.coopVecMap) {
+    Value *V = it.first;
+    DxilCoopVectorProperties &CVP = it.second;
+    // annotate Alloca, Param, or Global
+    if (AllocaInst *AI = dyn_cast<AllocaInst>(V)) {
+      // Insert annotation after alloca
+      IRBuilder<> Builder(AI->getNextNode());
+      CreateAnnotateCoopVector(HLM, V, CVP, Builder);
+    } else if (GlobalVariable *GV = dyn_cast<GlobalVariable>(V)) {
+      // Insert annotation in each function's entry block with users
+      SmallSetVector<Function *, 4> functions;
+      for (auto U : GV->users())
+        if (Instruction *I = dyn_cast<Instruction>(U))
+          functions.insert(I->getParent()->getParent());
+
+      for (auto F : functions) {
+        IRBuilder<> Builder(dxilutil::FindAllocaInsertionPt(F));
+        CreateAnnotateCoopVector(HLM, V, CVP, Builder);
+      }
+    } else if (Argument *Arg = dyn_cast<Argument>(V)) {
+      IRBuilder<> Builder(dxilutil::FindAllocaInsertionPt(Arg->getParent()));
+      CreateAnnotateCoopVector(HLM, V, CVP, Builder);
+    } else {
+      DXASSERT(false, "CoopVector value is unexpected type");
     }
   }
 }
@@ -3560,6 +3603,10 @@ void FinishIntrinsics(
   // Add AnnotateWaveMatrix
   AddAnnotateWaveMatrix(HLM, objectProperties);
 
+  // Add AnnotateCoopVector
+  AddAnnotateCoopVector(HLM, objectProperties);
+
+
   // translate opcode into parameter for intrinsic functions
   // Do this before CloneShaderEntry and TranslateRayQueryConstructor to avoid
   // update valToResPropertiesMap for cloned inst.
@@ -4085,8 +4132,23 @@ bool DxilObjectProperties::AddWaveMatrix(
   return false;
 }
 
+bool DxilObjectProperties::AddCoopVector(
+    llvm::Value *V, const hlsl::DxilCoopVectorProperties &CVP) {
+  if (CVP.isValid()) {
+    // DXASSERT(!GetCoopVector(V).isValid() || GetCoopVector(V) == CVP,
+    //          "otherwise, property conflict");
+    coopVecMap[V] = CVP;
+    return true;
+  }
+  return false;
+}
+
 bool DxilObjectProperties::IsWaveMatrix(llvm::Value *V) {
   return waveMatMap.count(V) != 0;
+}
+
+bool DxilObjectProperties::IsCoopVector(llvm::Value *V) {
+  return coopVecMap.count(V) != 0;
 }
 
 hlsl::DxilWaveMatrixProperties
@@ -4095,6 +4157,14 @@ DxilObjectProperties::GetWaveMatrix(llvm::Value *V) {
   if (it != waveMatMap.end())
     return it->second;
   return DxilWaveMatrixProperties();
+}
+
+hlsl::DxilCoopVectorProperties
+DxilObjectProperties::GetCoopVector(llvm::Value *V) {
+  auto it = coopVecMap.find(V);
+  if (it != coopVecMap.end())
+    return it->second;
+  return DxilCoopVectorProperties();
 }
 
 } // namespace CGHLSLMSHelper

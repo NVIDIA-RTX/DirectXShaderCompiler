@@ -245,6 +245,7 @@ public:
     }
 
     LowerHLAnnotateWaveMatrix(M);
+    LowerHLAnnotateCoopVector(M);
 
     std::unordered_set<Instruction *> UpdateCounterSet;
 
@@ -320,6 +321,7 @@ private:
   void LowerHLCreateHandle(
       std::unordered_map<CallInst *, Type *> &HandleToResTypeMap);
   void LowerHLAnnotateWaveMatrix(Module &M);
+  void LowerHLAnnotateCoopVector(Module &M);
 
   // Translate precise attribute into HL function call.
   void TranslatePreciseAttribute();
@@ -675,6 +677,37 @@ void DxilGenerationPass::LowerHLAnnotateWaveMatrix(Module &M) {
             DXIL::OpCode::WaveMatrix_Annotate, Builder.getVoidTy());
         CallInst *newCI =
             Builder.CreateCall(annotateWaveMatrix, {opArg, waveMatPtr, WMP});
+        if (!CI->user_empty())
+          CI->replaceAllUsesWith(Builder.CreateBitCast(newCI, CI->getType()));
+        CI->eraseFromParent();
+      }
+    }
+  }
+}
+
+void DxilGenerationPass::LowerHLAnnotateCoopVector(Module &M) {
+  hlsl::OP &hlslOP = *m_pHLModule->GetOP();
+  Value *opArg =
+      hlslOP.GetU32Const((unsigned)DXIL::OpCode::CoopVector_Annotate);
+  for (iplist<Function>::iterator F : M.getFunctionList()) {
+    if (F->user_empty())
+      continue;
+    if (hlsl::GetHLOpcodeGroup(F) == HLOpcodeGroup::HLCoopVector_Annotate) {
+      for (auto U = F->user_begin(); U != F->user_end();) {
+        Value *User = *(U++);
+        if (!isa<Instruction>(User))
+          continue;
+        // must be call inst
+        CallInst *CI = cast<CallInst>(User);
+        IRBuilder<> Builder(CI);
+        Value *coopVectorPtr =
+            CI->getArgOperand(HLOperandIndex::kAnnotateCoopVectorPtrOpIdx);
+        Value *CVP = CI->getArgOperand(
+            HLOperandIndex::kAnnotateCoopVectorPropertiesOpIdx);
+        Function *annotateCoopVector = hlslOP.GetOpFunc(
+            DXIL::OpCode::CoopVector_Annotate, Builder.getVoidTy());
+        CallInst *newCI =
+            Builder.CreateCall(annotateCoopVector, {opArg, coopVectorPtr, CVP});
         if (!CI->user_empty())
           CI->replaceAllUsesWith(Builder.CreateBitCast(newCI, CI->getType()));
         CI->eraseFromParent();

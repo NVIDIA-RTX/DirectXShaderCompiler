@@ -1133,6 +1133,7 @@ void LowerCoopVectorType::lowerUserWithNewValue(User *U, Value *V,
     HLOpcodeGroup group = GetHLOpcodeGroupByName(CI->getCalledFunction());
     // TODO:: Add check for HLAnnotate_CoopVector
     if (group == HLOpcodeGroup::HLIntrinsic ||
+        group == HLOpcodeGroup::HLCoopVector_Annotate ||
         group == HLOpcodeGroup::HLSubscript) {
       Type *NewRet = needToLower(CI) ? lowerType(CI->getType()) : nullptr;
       Value *NewU = RewriteIntrinsicCallForNewArg(CI, V, NewV, NewRet);

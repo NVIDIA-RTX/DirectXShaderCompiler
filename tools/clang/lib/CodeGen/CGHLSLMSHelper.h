@@ -38,6 +38,7 @@ namespace hlsl {
 class HLModule;
 struct DxilResourceProperties;
 struct DxilWaveMatrixProperties;
+struct DxilCoopVectorProperties;
 struct DxilFunctionProps;
 class DxilFieldAnnotation;
 enum class IntrinsicOp;
@@ -163,12 +164,16 @@ struct DxilObjectProperties {
   void updateGLC(llvm::Value *V);
 
   bool AddWaveMatrix(llvm::Value *V, const hlsl::DxilWaveMatrixProperties &WMP);
+  bool AddCoopVector(llvm::Value *V, const hlsl::DxilCoopVectorProperties &CVP);
   bool IsWaveMatrix(llvm::Value *V);
+  bool IsCoopVector(llvm::Value *V);
   hlsl::DxilWaveMatrixProperties GetWaveMatrix(llvm::Value *V);
+  hlsl::DxilCoopVectorProperties GetCoopVector(llvm::Value *V);
 
   // MapVector for deterministic iteration order.
   llvm::MapVector<llvm::Value *, hlsl::DxilResourceProperties> resMap;
   llvm::MapVector<llvm::Value *, hlsl::DxilWaveMatrixProperties> waveMatMap;
+  llvm::MapVector<llvm::Value *, hlsl::DxilCoopVectorProperties> coopVecMap;
 };
 
 void CopyAndAnnotateResourceArgument(llvm::Value *Src, llvm::Value *Dest,

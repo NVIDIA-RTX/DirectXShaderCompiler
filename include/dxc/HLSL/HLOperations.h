@@ -52,6 +52,7 @@ enum class HLOpcodeGroup {
   HLWaveMatrix_Annotate,
   HLAnnotateNodeHandle,
   HLAnnotateNodeRecordHandle,
+  HLCoopVector_Annotate,
   NumOfHLOps
 };
 
@@ -449,6 +450,11 @@ const unsigned kCoopVecIndexOpIdx = 2;
 const unsigned kCoopVecIndexValOpIdx = 3;
 const unsigned kCoopVecBitwiseShiftValIdx = 2;
 const unsigned kCoopVecArithmeticOpOperandIdx = 2;
+
+// AnnotateWaveMatrix.
+const unsigned kAnnotateCoopVectorPtrOpIdx = 1;
+const unsigned kAnnotateCoopVectorPropertiesOpIdx = 2;
+
 
 // Work Graph
 
