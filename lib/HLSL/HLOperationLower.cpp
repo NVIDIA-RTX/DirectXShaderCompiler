@@ -6418,14 +6418,28 @@ Value *TranslateCoopVectorMatrixMultiply(
   IRBuilder<> Builder(CI);
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
-  Value *ipVector =
-      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulIpVecPtridx);
-  Value *zeroVal = hlslOP->GetU32Const(0);
-  Value *falseVal = hlslOP->GetI1Const(0);
-  Value *buf = CI->getArgOperand(4);
+  Value *ipVector = CI->getArgOperand(HLOperandIndex::kCoopVecMatMulIpVecIdx);
+  Value *IpInterpretation =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulIpInterpretIdx);
+  Value *Matrix =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatBufferHdlIdx);
+  Value *MatrixOffset =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatOffsetIdx);
+  Value *MatrixInterpretation =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatInterpretIdx);
+  Value *MatDimM = CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatDimMIdx);
+  Value *MatDimK = CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatDimKIdx);
+  Value *MatLayout =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatLayoutIdx);
+  Value *MatIsTranspose =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatIsTransposeIdx);
+  Value *MatStride =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulMatStrideIdx);
+
   return Builder.CreateCall(dxilFunc, 
-                            {opArg, thisPtr, ipVector, zeroVal, buf, zeroVal,
-                             zeroVal, zeroVal, zeroVal, zeroVal, falseVal, zeroVal});
+                            {opArg, thisPtr, ipVector, IpInterpretation, Matrix,
+                             MatrixOffset, MatrixInterpretation, MatDimM,
+                             MatDimK, MatLayout, MatIsTranspose, MatStride});
 }
 Value *TranslateCoopVectorMatrixMultiplyAdd(
     CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
@@ -6439,14 +6453,37 @@ Value *TranslateCoopVectorMatrixMultiplyAdd(
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
   Value *ipVector =
-      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulIpVecPtridx);
-  Value *zeroVal = hlslOP->GetU32Const(0);
-  Value *buf = CI->getArgOperand(4);
-  Value *falseVal = hlslOP->GetI1Const(0);
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddIpVecIdx);
+  Value *IpInterpretation =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddIpInterpretIdx);
+  Value *Matrix =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatBufferHdlIdx);
+  Value *MatrixOffset =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatOffsetIdx);
+  Value *MatrixInterpretation =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatInterpretIdx);
+  Value *BiasBuffer =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddBiasBufferHdlIdx);
+  Value *Biasoffset =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddBiasBufferOffsetIdx);
+  Value *BiasInterpretation = CI->getArgOperand(
+      HLOperandIndex::kCoopVecMatMulAddBiasBufferInterpretIdx);
+  Value *MatDimM =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatDimMIdx);
+  Value *MatDimK =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatDimKIdx);
+  Value *MatLayout =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatLayoutIdx);
+  Value *MatIsTranspose =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatIsTransposeIdx);
+  Value *MatStride =
+      CI->getArgOperand(HLOperandIndex::kCoopVecMatMulAddMatStrideIdx);
+
   return Builder.CreateCall(dxilFunc,
-                            {opArg, thisPtr, ipVector, zeroVal, buf, zeroVal,
-                             zeroVal, buf, zeroVal, zeroVal, zeroVal, zeroVal,
-                             zeroVal, falseVal, zeroVal});
+                            {opArg, thisPtr, ipVector, IpInterpretation, Matrix,
+                             MatrixOffset, MatrixInterpretation, BiasBuffer,
+                             Biasoffset, BiasInterpretation, MatDimM, MatDimK,
+                             MatLayout, MatIsTranspose, MatStride});
 }
 
 Value *TranslateCoopVectorCopyFrom(CallInst *CI, IntrinsicOp IOP,

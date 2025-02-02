@@ -451,9 +451,31 @@ const unsigned kCoopVecIndexValOpIdx = 3;
 const unsigned kCoopVecBitwiseShiftValIdx = 2;
 const unsigned kCoopVecArithmeticOpOperandIdx = 2;
 
-// CoopVector MatMult Function Arg indices
-const unsigned kCoopVecMatMulIpVecPtridx = 2;
+// CoopVector MatMul Function Arg indices
+const unsigned kCoopVecMatMulIpVecIdx = 2;
+const unsigned kCoopVecMatMulIpInterpretIdx = 3;
+const unsigned kCoopVecMatMulMatBufferHdlIdx = 4;
+const unsigned kCoopVecMatMulMatOffsetIdx = 5;
+const unsigned kCoopVecMatMulMatInterpretIdx = 6;
+const unsigned kCoopVecMatMulMatDimMIdx = 7;
+const unsigned kCoopVecMatMulMatDimKIdx = 8;
+const unsigned kCoopVecMatMulMatLayoutIdx = 9;
+const unsigned kCoopVecMatMulMatIsTransposeIdx = 10;
+const unsigned kCoopVecMatMulMatStrideIdx = 11;
 
+const unsigned kCoopVecMatMulAddIpVecIdx = 2;
+const unsigned kCoopVecMatMulAddIpInterpretIdx = 3;
+const unsigned kCoopVecMatMulAddMatBufferHdlIdx = 4;
+const unsigned kCoopVecMatMulAddMatOffsetIdx = 5;
+const unsigned kCoopVecMatMulAddMatInterpretIdx = 6;
+const unsigned kCoopVecMatMulAddBiasBufferHdlIdx = 7;
+const unsigned kCoopVecMatMulAddBiasBufferOffsetIdx = 8;
+const unsigned kCoopVecMatMulAddBiasBufferInterpretIdx = 9;
+const unsigned kCoopVecMatMulAddMatDimMIdx = 10;
+const unsigned kCoopVecMatMulAddMatDimKIdx = 11;
+const unsigned kCoopVecMatMulAddMatLayoutIdx = 12;
+const unsigned kCoopVecMatMulAddMatIsTransposeIdx = 13;
+const unsigned kCoopVecMatMulAddMatStrideIdx = 14;
 
 // AnnotateWaveMatrix.
 const unsigned kAnnotateCoopVectorPtrOpIdx = 1;
