@@ -6592,7 +6592,7 @@ Value *TranslateArithmeticOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
   }
 }
 
-Value *TranslateCoopVectorMin(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+Value *TranslateCoopVectorScalarMin(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
                               HLOperationLowerHelper &helper,
                               HLObjectOperationLowerHelper *pObjHelper,
                               bool &Translated) {
@@ -6607,7 +6607,7 @@ Value *TranslateCoopVectorMin(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
 }
 
-Value *TranslateCoopVectorMax(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+Value *TranslateCoopVectorScalarMax(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
                               HLOperationLowerHelper &helper,
                               HLObjectOperationLowerHelper *pObjHelper,
                               bool &Translated) {
@@ -6621,6 +6621,37 @@ Value *TranslateCoopVectorMax(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
   Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecMinMaxValOpIdx);
 
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
+}
+
+Value *TranslateCoopVectorMin(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                              HLOperationLowerHelper &helper,
+                              HLObjectOperationLowerHelper *pObjHelper,
+                              bool &Translated) {
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+
+  Value *otherPtr = CI->getArgOperand(HLOperandIndex::kCoopVecMinMaxValOpIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, otherPtr});
+}
+
+Value *TranslateCoopVectorMax(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
+                              HLOperationLowerHelper &helper,
+                              HLObjectOperationLowerHelper *pObjHelper,
+                              bool &Translated) {
+
+  hlsl::OP *hlslOP = &helper.hlslOP;
+  Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
+  IRBuilder<> Builder(CI);
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
+  Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
+
+  Value *otherPtr = CI->getArgOperand(HLOperandIndex::kCoopVecMinMaxValOpIdx);
+
+  return Builder.CreateCall(dxilFunc, {opArg, thisPtr, otherPtr});
 }
 
 Value *TranslateCoopVectorClamp(CallInst *CI, IntrinsicOp IOP,
@@ -7474,6 +7505,10 @@ IntrinsicLower gLowerTable[] = {
      DXIL::OpCode::WaveMatrix_ScalarOp},
     {IntrinsicOp::MOP_ScalarMod, TranslateScalarOp,
      DXIL::OpCode::WaveMatrix_ScalarOp},
+    {IntrinsicOp::MOP_ScalarMin, TranslateCoopVectorScalarMin,
+     DXIL::OpCode::CoopVector_ScalarMin},
+    {IntrinsicOp::MOP_ScalarMax, TranslateCoopVectorScalarMax,
+     DXIL::OpCode::CoopVector_ScalarMax},
     {IntrinsicOp::MOP_SumAccumulate, TranslateWaveMatrix_Accumulate,
      DXIL::OpCode::WaveMatrix_SumAccumulate},
     {IntrinsicOp::MOP_Add, TranslateArithmeticOp, 

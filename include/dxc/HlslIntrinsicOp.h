@@ -350,6 +350,8 @@ enum class IntrinsicOp {
   MOP_ScalarMultiply,
   MOP_ScalarSubtract,
   MOP_ScalarMod,
+  MOP_ScalarMin,
+  MOP_ScalarMax,
   MOP_SumAccumulate,
   MOP_Add,
   MOP_Multiply,

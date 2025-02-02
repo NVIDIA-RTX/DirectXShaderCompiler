@@ -2382,16 +2382,18 @@ ID  Name                                                  Description
 268 CoopVector_MatMulAdd                                  Vector Matrix Multiply
 269 CoopVector_CopyFrom                                   Perform scalar operation on each element of Cooperative Vector
 270 CoopVector_ScalarMulAdd                               Perform scalar operation on each element of Cooperative Vector
-271 CoopVector_Min                                        Perform scalar operation on each element of Cooperative Vector
-272 CoopVector_Max                                        Perform scalar operation on each element of Cooperative Vector
-273 CoopVector_ReadFromIndex                              Read a Coop Vector Element at Index
-274 CoopVector_WriteToIndex                               Write a Coop Vector Element at Index
-275 CoopVector_Activation                                 Perform scalar operation on each element of Cooperative Vector
-276 CoopVector_Clamp                                      Perform scalar operation on each element of Cooperative Vector
-277 CoopVector_BitwiseOp                                  Perform bitwise operation on each element of Cooperative Vector
-278 CoopVector_ScalarBitwiseOp                            Perform Scalar bitwise operation on each element of Cooperative Vector
-279 CoopVector_BitwiseShift                               Shift left each integer vector by given num of bits
-280 CoopVector_Negate                                     Unary Complement
+271 CoopVector_ScalarMin                                  Perform scalar operation on each element of Cooperative Vector
+272 CoopVector_ScalarMax                                  Perform scalar operation on each element of Cooperative Vector
+273 CoopVector_Min                                        Perform componentwise min between Coop Vectors
+274 CoopVector_Max                                        Perform componentwise max between Coop Vectors
+275 CoopVector_ReadFromIndex                              Read a Coop Vector Element at Index
+276 CoopVector_WriteToIndex                               Write a Coop Vector Element at Index
+277 CoopVector_Activation                                 Perform scalar operation on each element of Cooperative Vector
+278 CoopVector_Clamp                                      Perform scalar operation on each element of Cooperative Vector
+279 CoopVector_BitwiseOp                                  Perform bitwise operation on each element of Cooperative Vector
+280 CoopVector_ScalarBitwiseOp                            Perform Scalar bitwise operation on each element of Cooperative Vector
+281 CoopVector_BitwiseShift                               Shift left each integer vector by given num of bits
+282 CoopVector_Negate                                     Unary Complement
 === ===================================================== =======================================================================================================================================================================================================================
 
 

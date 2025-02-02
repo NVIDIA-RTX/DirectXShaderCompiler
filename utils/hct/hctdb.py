@@ -720,10 +720,10 @@ class db_dxil(object):
         for i in "CoopVector_ScalarOp,CoopVector_LoadRawBuf,CoopVector_StoreRawBuf,CoopVector_MatMul".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
-        for i in "CoopVector_MatMulAdd,CoopVector_CopyFrom,CoopVector_ScalarMulAdd,CoopVector_Min,CoopVector_Max,CoopVector_Clamp,CoopVector_Activation".split(","):
+        for i in "CoopVector_MatMulAdd,CoopVector_CopyFrom,CoopVector_ScalarMulAdd,CoopVector_ScalarMin,CoopVector_ScalarMax,CoopVector_Clamp,CoopVector_Activation".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
-        for i in "CoopVector_BitwiseOp,CoopVector_BitwiseShift,CoopVector_Negate".split(","):
+        for i in "CoopVector_BitwiseOp,CoopVector_BitwiseShift,CoopVector_Negate,CoopVector_Min,CoopVector_Max".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6, 8
         for i in "CoopVector_ReadFromIndex,CoopVector_WriteToIndex,CoopVector_LoadGroupShared,CoopVector_StoreGroupShared".split(","):
@@ -5953,9 +5953,9 @@ class db_dxil(object):
         )
         next_op_idx += 1
         self.add_dxil_op(
-            "CoopVector_Min",
+            "CoopVector_ScalarMin",
             next_op_idx,
-            "CoopVector_Min",
+            "CoopVector_ScalarMin",
             "Perform scalar operation on each element of Cooperative Vector",
             "hfd8wi",
             "amo",
@@ -5967,9 +5967,9 @@ class db_dxil(object):
         )
         next_op_idx += 1
         self.add_dxil_op(
-            "CoopVector_Max",
+            "CoopVector_ScalarMax",
             next_op_idx,
-            "CoopVector_Max",
+            "CoopVector_ScalarMax",
             "Perform scalar operation on each element of Cooperative Vector",
             "hfd8wi",
             "amo",
@@ -5977,6 +5977,35 @@ class db_dxil(object):
                 db_dxil_param(0, "v", "", ""),
                 db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
                 db_dxil_param(3, "$o", "value", "max value"),
+            ],
+        )
+        next_op_idx += 1
+
+        self.add_dxil_op(
+            "CoopVector_Min",
+            next_op_idx,
+            "CoopVector_Min",
+            "Perform componentwise min between Coop Vectors",
+            "v",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "coopvector", "coopvectorPtrOther", "Coop Vector pointer"),
+            ],
+        )
+        next_op_idx += 1
+        self.add_dxil_op(
+            "CoopVector_Max",
+            next_op_idx,
+            "CoopVector_Max",
+            "Perform componentwise max between Coop Vectors",
+            "v",
+            "",
+            [
+                db_dxil_param(0, "v", "", ""),
+                db_dxil_param(2, "coopvector", "coopvectorPtr", "Coop Vector pointer"),
+                db_dxil_param(3, "coopvector", "coopvectorPtrOther", "Coop Vector pointer"),
             ],
         )
         next_op_idx += 1
@@ -6155,7 +6184,7 @@ class db_dxil(object):
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 281   , (
+        assert next_op_idx == 283   , (
             "258 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )

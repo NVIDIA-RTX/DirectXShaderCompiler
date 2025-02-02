@@ -1279,8 +1279,10 @@ namespace CoopVecMethods {
 	void [[amo]] CopyFrom(in CoopVec ipVec);
 	$match<-1, -1> numeric [[amo]] ReadFromIndex(in uint index);
 	void [[amo]] WriteToIndex(in uint index, in $match<1, -1> numeric value);
-	void [[amo]] Min(in $match<1, -1> numeric value);
-	void [[amo]] Max(in $match<1, -1> numeric value);
+	void [[amo]] Min(in CoopVec VecA);
+	void [[amo]] Max(in CoopVec VecB);
+	void [[amo]] ScalarMin(in $match<1, -1> numeric value);
+	void [[amo]] ScalarMax(in $match<1, -1> numeric value);
 	void [[amo]] Clamp(in CoopVec floorVec, in CoopVec ceilVec);
 	void [[amo]] Activation(in uint op);
 	void [[amo]] BitwiseAND(in CoopVec CoopVecA);
