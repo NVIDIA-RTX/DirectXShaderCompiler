@@ -6910,11 +6910,11 @@ Value *TranslateCoopVectorRedSumAcc(CallInst *CI, IntrinsicOp IOP,
   IRBuilder<> Builder(CI);
   Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
-  Value *IpVector = CI->getArgOperand(HLOperandIndex::kWaveMatThisOpIdx); 
-  Value *Buffer =
-      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatIdx);
+  Value *IpVector =
+      CI->getArgOperand(HLOperandIndex::kCoopVecRedSumAccIpVecIdx); 
+  Value *Buffer = CI->getArgOperand(HLOperandIndex::kCoopVecRedSumAccBufIdx);
   Value *BufferOffset =
-      CI->getArgOperand(HLOperandIndex::kCoopVecOuterProdAccOpMatOffsetIdx);
+      CI->getArgOperand(HLOperandIndex::kCoopVecRedSumAccBufOffsetIdx);
 
   return Builder.CreateCall(dxilFunc,
                             {opArg, IpVector, Buffer, BufferOffset});
