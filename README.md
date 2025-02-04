@@ -6,6 +6,11 @@ For more information, see the [Wiki](https://github.com/microsoft/DirectXShaderC
 
 Visit the [DirectX Landing Page](https://devblogs.microsoft.com/directx/landing-page/) for more resources for DirectX developers.
 
+## Pre-Release Feature Warning
+This DXC project is an Nvidia customized version that implements a proof-of-concept [Cooperative Vector Specification](). Shaders compiled using the new types and intrinisics produce new DXIL instructions, these shaders using cannot be signed, and Windows must be in the Developer Mode for them to work.
+The DX12 Cooperative Vector support is for testing purposes only. **DO NOT SHIP ANY PRODUCTS USING IT.**
+The experimental implementation will be replaced by the official Microsoft API later in 2025, and NVIDIA driver support for the current version will be removed shortly after that.  
+
 ## Features and Goals
 
 The starting point of the project is a fork of the [LLVM](http://llvm.org/) and [Clang](http://clang.llvm.org/) projects, modified to accept HLSL and emit a validated container that can be consumed by GPU drivers.
