@@ -6187,6 +6187,7 @@ class db_dxil(object):
                 (2, "Invalid", ""),
             ],
         )
+
         self.add_dxil_op(
             "CoopVector_Negate",
             next_op_idx,
@@ -6239,7 +6240,7 @@ class db_dxil(object):
 
         # End of DXIL 1.8 opcodes.
         self.set_op_count_for_version(1, 8, next_op_idx)
-        assert next_op_idx == 286   , (
+        assert next_op_idx == 286, (
             "286 is expected next operation index but encountered %d and thus opcodes are broken"
             % next_op_idx
         )
