@@ -6564,7 +6564,7 @@ Value *TranslateArithmeticOp(CallInst *CI, IntrinsicOp IOP, OP::OpCode opcode,
 
   if (dxilutil::IsDXILCoopVectorType(thisPtr->getType())) {
     isCoopVec = true;
-  } else if (dxilutil::IsHLSLWaveMatrixType(thisPtr->getType())) {
+  } else if (dxilutil::IsDXILWaveMatrixType(thisPtr->getType())) {
     isWaveMatrix = true;
   } else {
     DXASSERT(false, "Shouldn't get here");

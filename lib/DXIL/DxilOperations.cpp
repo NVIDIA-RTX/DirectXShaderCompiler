@@ -1168,6 +1168,17 @@ void OP::GetMinShaderModelAndMask(OpCode C, bool bWithTranslation,
     major = 6;  minor = 8;
     return;
   }
+  // Instructions: WaveMatrix_Annotate=226, WaveMatrix_Depth=227,
+  // WaveMatrix_Fill=228, WaveMatrix_LoadRawBuf=229,
+  // WaveMatrix_LoadGroupShared=230, WaveMatrix_StoreRawBuf=231,
+  // WaveMatrix_StoreGroupShared=232, WaveMatrix_Multiply=233,
+  // WaveMatrix_MultiplyAccumulate=234, WaveMatrix_ScalarOp=235,
+  // WaveMatrix_SumAccumulate=236, WaveMatrix_Add=237
+  if ((226 <= op && op <= 237)) {
+    major = 6;  minor = 8;
+    mask = SFLAG(Library) | SFLAG(Compute);
+    return;
+  }
   // Instructions: SampleCmpBias=255
   if (op == 255) {
     major = 6;  minor = 8;
@@ -1198,17 +1209,6 @@ void OP::GetMinShaderModelAndMask(OpCode C, bool bWithTranslation,
     } else {
       major = 6;  minor = 8;
     }
-    return;
-  }
-  // Instructions: WaveMatrix_Annotate=226, WaveMatrix_Depth=227,
-  // WaveMatrix_Fill=228, WaveMatrix_LoadRawBuf=229,
-  // WaveMatrix_LoadGroupShared=230, WaveMatrix_StoreRawBuf=231,
-  // WaveMatrix_StoreGroupShared=232, WaveMatrix_Multiply=233,
-  // WaveMatrix_MultiplyAccumulate=234, WaveMatrix_ScalarOp=235,
-  // WaveMatrix_SumAccumulate=236, WaveMatrix_Add=237
-  if ((226 <= op && op <= 237)) {
-    major = 6;  minor = 9;
-    mask = SFLAG(Library) | SFLAG(Compute);
     return;
   }
   // OPCODE-SMMASK:END
@@ -1373,7 +1373,7 @@ OP::OP(LLVMContext &Ctx, Module *pModule)
       m_Ctx, WaveMatInfoTypes, "dx.types.waveMatProps", pModule));
   m_pWaveMatPtrType =
       PointerType::get(GetOrCreateStructType(m_Ctx, Type::getInt8PtrTy(m_Ctx),
-                                             "dx.types.waveMatrix", pModule),
+                                             "dx.types.WaveMatrix", pModule),
                        0);
   m_pCoopVectorType =
       PointerType::get(GetOrCreateStructType(m_Ctx, Type::getInt8PtrTy(m_Ctx),

@@ -638,18 +638,6 @@ class db_dxil(object):
         for i in "IsHelperLane".split(","):
             self.name_idx[i].category = "Helper Lanes"
             self.name_idx[i].shader_model = 6, 6
-        for i in (
-            "WaveMatrix_Annotate,WaveMatrix_Depth,WaveMatrix_Fill,"
-            + "WaveMatrix_LoadRawBuf,WaveMatrix_LoadGroupShared,WaveMatrix_StoreRawBuf,WaveMatrix_StoreGroupShared,"
-            + "WaveMatrix_Multiply,WaveMatrix_MultiplyAccumulate,WaveMatrix_ScalarOp,"
-            + "WaveMatrix_SumAccumulate,WaveMatrix_Add"
-        ).split(","):
-            self.name_idx[i].category = "WaveMatrix"
-            self.name_idx[i].shader_model = 6, 9
-            self.name_idx[i].shader_stages = (
-                "library",
-                "compute",
-            )
         for i in "QuadVote,TextureGatherRaw,SampleCmpLevel,TextureStoreSample".split(
             ","
         ):
@@ -708,7 +696,18 @@ class db_dxil(object):
             self.name_idx[i].category = "Extended Command Information"
             self.name_idx[i].shader_stages = ("vertex",)
             self.name_idx[i].shader_model = 6, 8
-
+        for i in (
+            "WaveMatrix_Annotate,WaveMatrix_Depth,WaveMatrix_Fill,"
+            + "WaveMatrix_LoadRawBuf,WaveMatrix_LoadGroupShared,WaveMatrix_StoreRawBuf,WaveMatrix_StoreGroupShared,"
+            + "WaveMatrix_Multiply,WaveMatrix_MultiplyAccumulate,WaveMatrix_ScalarOp,"
+            + "WaveMatrix_SumAccumulate,WaveMatrix_Add"
+        ).split(","):
+            self.name_idx[i].category = "WaveMatrix"
+            self.name_idx[i].shader_model = 6, 8
+            self.name_idx[i].shader_stages = (
+                "library",
+                "compute",
+            )
         for i in "CoopVector_Index".split(","):
             self.name_idx[i].category = "CoopVector"
             self.name_idx[i].shader_model = 6,8
