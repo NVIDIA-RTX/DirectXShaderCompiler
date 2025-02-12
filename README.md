@@ -33,7 +33,7 @@ The goal of the project is to allow the broader community of shader developers t
 
 ### Pre-built Releases
 
-Development kits containing only the dxc.exe driver app, the dxcompiler.dll, and the dxil.dll signing binary are available [here](https://github.com/microsoft/DirectXShaderCompiler/wiki/Releases), or in the [releases tab](https://github.com/microsoft/DirectXShaderCompiler/releases).
+Development kits containing only the dxc.exe driver app, the dxcompiler.dll, and the dxil.dll signing binary are available [here](https://github.com/NVIDIA-RTX/DirectXShaderCompiler/releases)
 
 ### SPIR-V CodeGen
 
