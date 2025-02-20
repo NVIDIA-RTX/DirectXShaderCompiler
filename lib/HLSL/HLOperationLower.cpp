@@ -6636,10 +6636,10 @@ Value *TranslateCoopVectorScalarMin(CallInst *CI, IntrinsicOp IOP, OP::OpCode op
   hlsl::OP *hlslOP = &helper.hlslOP;
   Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
   IRBuilder<> Builder(CI);
-  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
-
   Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecMinMaxValOpIdx);
+
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, val->getType());
 
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
 }
@@ -6652,10 +6652,10 @@ Value *TranslateCoopVectorScalarMax(CallInst *CI, IntrinsicOp IOP, OP::OpCode op
   hlsl::OP *hlslOP = &helper.hlslOP;
   Value *thisPtr = CI->getArgOperand(HLOperandIndex::kCoopVecThisOpIdx);
   IRBuilder<> Builder(CI);
-  Function *dxilFunc = hlslOP->GetOpFunc(opcode, helper.voidTy);
   Constant *opArg = hlslOP->GetU32Const((unsigned)opcode);
-
   Value *val = CI->getArgOperand(HLOperandIndex::kCoopVecMinMaxValOpIdx);
+
+  Function *dxilFunc = hlslOP->GetOpFunc(opcode, val->getType());
 
   return Builder.CreateCall(dxilFunc, {opArg, thisPtr, val});
 }
