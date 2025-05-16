@@ -707,6 +707,7 @@ class db_dxil(object):
             self.name_idx[i].shader_stages = (
                 "library",
                 "compute",
+                "node"
             )
         for i in "CoopVector_Index".split(","):
             self.name_idx[i].category = "CoopVector"

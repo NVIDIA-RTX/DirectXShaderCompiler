@@ -3582,7 +3582,7 @@ void OP::GetMinShaderModelAndMask(OpCode C, bool bWithTranslation,
   if ((226 <= op && op <= 237)) {
     major = 6;
     minor = 8;
-    mask = SFLAG(Library) | SFLAG(Compute);
+    mask = SFLAG(Library) | SFLAG(Compute) | SFLAG(Node);
     return;
   }
   // Instructions: SampleCmpBias=255
